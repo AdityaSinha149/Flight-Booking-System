@@ -56,7 +56,7 @@ export default function SearchBar() {
 
   return (
     <div className="flex flex-col items-center justify-center bg-transparent">
-      <div className="flex items-center bg-gray-800 shadow-md rounded-md overflow-hidden w-full max-w-5xl mx-auto border border-gray-300">
+      <div className="flex items-center bg-gray-950 shadow-md rounded-md overflow-hidden w-full max-w-5xl mx-auto border border-gray-300">
         
         {/* From Input */}
         <div ref={fromRef} className="relative flex-1 border-r border-gray-300 flex items-center px-4 py-3">
@@ -133,7 +133,7 @@ export default function SearchBar() {
         {/* Date Picker */}
         <div className="relative flex-1 border-r border-gray-300 flex items-center px-4 py-3">
           <span className="text-gray-400 mr-2">📅</span>
-          <input type="date" className="w-full bg-transparent outline-none text-white" />
+          <input type="date" className="w-full bg-transparent outline-none text-gray-400" />
         </div>
 
         {/* Passenger Count */}
