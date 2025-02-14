@@ -56,7 +56,7 @@ export default function SearchBar() {
 
   return (
     <div className="flex flex-col items-center justify-center bg-transparent">
-      <div className="flex items-center bg-gray-700 shadow-md rounded-md overflow-hidden w-full max-w-5xl mx-auto border border-gray-300">
+      <div className="flex items-center bg-gray-800 shadow-md rounded-md overflow-hidden w-full max-w-5xl mx-auto border border-gray-300">
         
         {/* From Input */}
         <div ref={fromRef} className="relative flex-1 border-r border-gray-300 flex items-center px-4 py-3">
@@ -73,7 +73,7 @@ export default function SearchBar() {
             onFocus={() => setShowFromDropdown(true)}
           />
           {showFromDropdown && (
-            <ul className="absolute top-full left-0 w-full bg-black text-white shadow-md border border-gray-600 mt-1 max-h-40 overflow-auto rounded-md z-50">
+            <ul className="absolute top-full left-0 w-full bg-black text-white shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50">
               {filteredFrom.length > 0 ? (
                 filteredFrom.map((loc, index) => (
                   <li
