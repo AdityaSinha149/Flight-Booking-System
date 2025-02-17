@@ -3,10 +3,11 @@ import { useState } from "react";
 
 function SignupCard({ onClose }) {
   const [email, setEmail] = useState("");
+  const [phoneNo, setPhoneNo] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSignup = async () => {
-    if (!email || !password) {
+    if (!email || !phoneNo || !password) {
       alert("Please fill in all fields.");
       return;
     }
@@ -15,7 +16,7 @@ function SignupCard({ onClose }) {
       const response = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, phone_no: phoneNo, password }),
       });
 
       const data = await response.json();
@@ -23,7 +24,7 @@ function SignupCard({ onClose }) {
         alert("Signup successful!");
         onClose();
       } else {
-        alert(data.message || "Signup failed.");
+        alert(data.error || "Signup failed.");
       }
     } catch (error) {
       console.error("Signup error:", error);
@@ -39,13 +40,20 @@ function SignupCard({ onClose }) {
       >
         ✖
       </button>
-      <h2 className="text-xl font-bold mb-4">Sign up for Tripma</h2>
+      <h2 className="text-xl font-bold mb-4">Sign up</h2>
       <input 
         type="text" 
-        placeholder="Email or phone number" 
+        placeholder="Email" 
         className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+      />
+      <input 
+        type="text" 
+        placeholder="Phone Number" 
+        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
+        value={phoneNo}
+        onChange={(e) => setPhoneNo(e.target.value)}
       />
       <input 
         type="password" 

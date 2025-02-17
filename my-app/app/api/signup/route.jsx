@@ -1,21 +1,43 @@
-import pool from "@/models/prisma";
+import { NextResponse } from "next/server";
+import mysql from "mysql2/promise";
+import bcrypt from "bcrypt";
 
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const { email, password } = await request.json();
-    if (!email || !password) {
-      return new Response(JSON.stringify({ message: "Missing fields." }), {
-        status: 400,
-      });
+    const { email, phone_no, password } = await req.json();
+    if (!email || !phone_no || !password) 
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+
+    const connection = await mysql.createConnection({
+      host: "localhost",
+      user: "root",
+      password: "sinha",
+      database: "airline_booking",
+    });
+
+    console.log("Connected to DB successfully");
+
+    const [existingUser] = await connection.execute(
+      "SELECT user_id FROM users WHERE email = ? OR phone_no = ?", 
+      [email, phone_no]
+    );
+    
+    if (existingUser.length) {
+      connection.end();
+      return NextResponse.json({ error: "Email or phone number already registered" }, { status: 409 });
     }
-    const query = "INSERT INTO users (email, password) VALUES (?, ?)";
-    await pool.query(query, [email, password]);
-    return new Response(JSON.stringify({ message: "Signup successful." }), {
-      status: 201,
-    });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const [result] = await connection.execute(
+      "INSERT INTO users (email, phone_no, password) VALUES (?, ?, ?)", 
+      [email, phone_no, hashedPassword]
+    );
+
+    connection.end();
+    return NextResponse.json({ message: "Signup successful!", userId: result.insertId }, { status: 201 });
+
   } catch (error) {
-    return new Response(JSON.stringify({ message: "An error occurred." }), {
-      status: 500,
-    });
+    console.error("Database Error:", error);
+    return NextResponse.json({ error: "Database error", details: error.message }, { status: 500 });
   }
 }
