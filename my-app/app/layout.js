@@ -1,5 +1,6 @@
 import "./globals.css";
 import { AuthProvider } from './AuthContext';
+import { ThemeProvider } from './ThemeContext';
 
 export const metadata = {
   title: "Tripma - Your Traver Buddy",
@@ -10,9 +11,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

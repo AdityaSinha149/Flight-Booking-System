@@ -1,24 +1,74 @@
-import React from 'react';
-import { useAuth } from '@/app/AuthContext';
+"use client";
+import React from "react";
+import { useAuth } from "@/app/AuthContext";
+import { useTheme } from "@/app/ThemeContext";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
 
 function Navbar() {
   const { toggleSignupVisibility, toggleSigninVisibility, loggedIn, toggleLoggedIn, name } = useAuth();
-  
+  const { dark, toggleDarkMode } = useTheme();
+
   return (
-    <nav className="bg-gray-900 h-[4rem] flex justify-between items-center px-10">
+    <nav className={`border-[#605DEC] border-b-4 ${dark ? "bg-gray-900" : "bg-gray-300"} h-[4rem] flex justify-between items-center px-10`}>
+      {/* Logo */}
       <img src="/logo.png" alt="Logo" className="w-[7rem] h-auto" />
+
       {loggedIn ? (
         <>
-          <h1 className="text-2xl font-bold text-black dark:text-gray-500 ">Welcome {name}</h1>
-          <div className="flex space-x-4">
-            <button><div className="text-gray-500">My Trips</div></button>
-            <button className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md" onClick={toggleLoggedIn}>Sign out</button>
+          {/* Welcome Message */}
+          <h1 className={`text-2xl font-bold ${dark ? "text-gray-500" : "text-black"}`}>Welcome {name}</h1>
+
+          <div className="flex space-x-4 items-center">
+            {/* My Trips */}
+            <button className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline`}>My Trips</button>
+
+            {/* Sign Out Button */}
+            <button
+              className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md"
+              onClick={toggleLoggedIn}
+            >
+              Sign out
+            </button>
+
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className={`p-2 rounded-full transition ${dark ? "bg-gray-700" : "bg-gray-200"}`}
+            >
+              {dark ? (
+                <MoonIcon className="h-6 w-6 text-gray-900" />
+              ) : (
+                <SunIcon className="h-6 w-6 text-yellow-500" />
+              )}
+            </button>
           </div>
         </>
       ) : (
-        <div className="flex space-x-4">
-          <button onClick={toggleSigninVisibility}><div className="text-gray-500">Sign in</div></button>
-          <button className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md" onClick={toggleSignupVisibility}>Sign up</button>
+        <div className="flex space-x-4 items-center">
+          {/* Sign In Button */}
+          <button onClick={toggleSigninVisibility} className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline`}>
+            Sign in
+          </button>
+
+          {/* Sign Up Button */}
+          <button
+            className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md"
+            onClick={toggleSignupVisibility}
+          >
+            Sign up
+          </button>
+
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className={`p-2 rounded-full transition ${dark ? "bg-gray-700" : "bg-gray-200"}`}
+          >
+            {dark ? (
+              <MoonIcon className="h-6 w-6 text-gray-900" />
+            ) : (
+              <SunIcon className="h-6 w-6 text-yellow-500" />
+            )}
+          </button>
         </div>
       )}
     </nav>

@@ -22,3 +22,28 @@
     background-size: 200% auto;
     animation: gradientShift 6s linear infinite;
 }
+
+@keyframes gradientShiftLight {
+    0% {
+        background-position: 200% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.gradientTextLight { /* Changed from .gradientText-light */
+    background: linear-gradient(
+        to right,
+        #3B82F6,  /* Brighter Blue */
+        #60A5FA,  /* Soft Sky Blue */
+        #93C5FD,  /* Lighter Blue */
+        #A78BFA,  /* Light Purple */
+        #C084FC,  /* Pastel Violet */
+        #9333EA   /* Vibrant Indigo */
+    );
+    background-clip: text;
+    color: transparent;
+    background-size: 200% auto;
+    animation: gradientShiftLight 6s linear infinite;
+}

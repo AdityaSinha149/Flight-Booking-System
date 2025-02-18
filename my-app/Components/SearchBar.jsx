@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useTheme } from "@/app/ThemeContext";
 
 export default function SearchBar() {
+  const { dark } = useTheme();
   const [locations, setLocations] = useState([]);
   const [fromInput, setFromInput] = useState("");
   const [toInput, setToInput] = useState("");
@@ -25,8 +27,8 @@ export default function SearchBar() {
     setFilteredFrom(
       fromInput
         ? locations.filter((loc) =>
-          loc.toLowerCase().startsWith(fromInput.toLowerCase())
-        )
+            loc.toLowerCase().startsWith(fromInput.toLowerCase())
+          )
         : locations
     );
   }, [fromInput, locations]);
@@ -35,8 +37,8 @@ export default function SearchBar() {
     setFilteredTo(
       toInput
         ? locations.filter((loc) =>
-          loc.toLowerCase().startsWith(toInput.toLowerCase())
-        )
+            loc.toLowerCase().startsWith(toInput.toLowerCase())
+          )
         : locations
     );
   }, [toInput, locations]);
@@ -57,15 +59,20 @@ export default function SearchBar() {
 
   return (
     <div className="flex flex-col items-center justify-center bg-transparent">
-      <div className="flex items-center bg-[#202020] shadow-md rounded-md w-full max-w-5xl mx-auto border border-gray-300">
-
+      <div
+        className={`flex items-center shadow-md rounded-md w-full max-w-5xl mx-auto border border-gray-300 ${
+          dark ? "bg-[#202020]" : "bg-gray-100"
+        }`}
+      >
         {/* From Input */}
         <div ref={fromRef} className="relative flex-1 border-r border-gray-300 flex items-center px-4 py-3">
-          <span className="text-gray-400 mr-2">✈️</span>
+          <span className="mr-2">✈️</span>
           <input
             type="text"
             placeholder="From where?"
-            className="w-full bg-transparent outline-none text-white"
+            className={`w-full bg-transparent outline-none ${
+              dark ? "text-white" : "text-black"
+            }`}
             value={fromInput}
             onChange={(e) => {
               setFromInput(e.target.value);
@@ -78,12 +85,16 @@ export default function SearchBar() {
             }}
           />
           {showFromDropdown && (
-            <ul className="absolute top-full left-0 w-full bg-black text-white shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50">
+            <ul
+              className={`absolute top-full left-0 w-full shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50 ${
+                dark ? "bg-black text-white" : "bg-white text-black"
+              }`}
+            >
               {filteredFrom.length > 0 ? (
                 filteredFrom.map((loc, index) => (
                   <li
                     key={index}
-                    className="px-4 py-2 hover:bg-gray-800 cursor-pointer"
+                    className={`px-4 py-2 cursor-pointer ${dark ? "hover:bg-gray-800" : "hover:bg-gray-300"}`}
                     onClick={() => {
                       setFromInput(loc);
                       setShowFromDropdown(false);
@@ -101,11 +112,13 @@ export default function SearchBar() {
 
         {/* To Input */}
         <div ref={toRef} className="relative flex-1 border-r border-gray-300 flex items-center px-4 py-3">
-          <span className="text-gray-400 mr-2">✈️</span>
+          <span className="mr-2">✈️</span>
           <input
             type="text"
             placeholder="Where to?"
-            className="w-full bg-transparent outline-none text-white"
+            className={`w-full bg-transparent outline-none ${
+              dark ? "text-white" : "text-black"
+            }`}
             value={toInput}
             onChange={(e) => {
               setToInput(e.target.value);
@@ -118,12 +131,16 @@ export default function SearchBar() {
             }}
           />
           {showToDropdown && (
-            <ul className="absolute top-full left-0 w-full bg-black text-white shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50">
+            <ul
+              className={`absolute top-full left-0 w-full shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50 ${
+                dark ? "bg-black text-white" : "bg-white text-black"
+              }`}
+            >
               {filteredTo.length > 0 ? (
                 filteredTo.map((loc, index) => (
                   <li
                     key={index}
-                    className="px-4 py-2 hover:bg-gray-800 cursor-pointer"
+                    className={`px-4 py-2 cursor-pointer ${dark ? "hover:bg-gray-800" : "hover:bg-gray-300"}`}
                     onClick={() => {
                       setToInput(loc);
                       setShowToDropdown(false);
@@ -141,20 +158,27 @@ export default function SearchBar() {
 
         {/* Date Picker */}
         <div className="relative flex-1 border-r border-gray-300 flex items-center px-4 py-3">
-          <span className="text-white mr-2">📅</span>
+          <span className="mr-2">📅</span>
           <input
             type="date"
-            className={`w-full bg-transparent outline-none ${date ? "text-white" : "text-gray-400"}`}
+            className={`w-full bg-transparent outline-none ${
+              date ? (dark ? "text-white" : "text-black") : "text-gray-400"
+            }`}
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
 
-
         {/* Passenger Count */}
         <div className="relative flex-1 flex items-center px-4 py-3">
           <span className="text-gray-400 mr-2">👤</span>
-          <input type="text" placeholder="1 adult" className="w-full bg-transparent outline-none text-white" />
+          <input
+            type="text"
+            placeholder="1 adult"
+            className={`w-full bg-transparent outline-none ${
+              dark ? "text-white" : "text-black"
+            }`}
+          />
         </div>
 
         {/* Search Button */}

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useAuth } from "@/app/AuthContext";
+import { useTheme } from "@/app/ThemeContext";
 
 function SigninCard() {
   const [username, setUsername] = useState("");
@@ -8,6 +9,7 @@ function SigninCard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { toggleSigninVisibility, setName, toggleLoggedIn } = useAuth();
+  const { dark } = useTheme();
 
   const handleSignin = async () => {
     if (!username || !password) {
@@ -41,9 +43,9 @@ function SigninCard() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-[400px] relative text-black dark:text-white">
+    <div className={`p-6 rounded-lg shadow-lg w-[400px] relative ${dark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
       <button
-        className="absolute top-2 right-2 text-black dark:text-white hover:text-gray-700 dark:hover:text-gray-300"
+        className={`absolute top-2 right-2 hover:${dark ? "text-gray-300" : "text-gray-700"}`}
         onClick={toggleSigninVisibility}
         disabled={loading}
       >
@@ -56,7 +58,7 @@ function SigninCard() {
       <input
         type="text"
         placeholder="Email or Phone Number"
-        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
+        className={`w-full p-2 border rounded mb-3 ${dark ? "border-gray-600 bg-gray-800 text-white" : "border-gray-300 bg-white text-black"}`}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         disabled={loading}
@@ -65,7 +67,7 @@ function SigninCard() {
       <input
         type="password"
         placeholder="Password"
-        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
+        className={`w-full p-2 border rounded mb-3 ${dark ? "border-gray-600 bg-gray-800 text-white" : "border-gray-300 bg-white text-black"}`}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         disabled={loading}
