@@ -2,7 +2,7 @@
 **primary_key**, attribute, _foreign_key_
 
 ## Users
-**user_id**, password, email, phone_no  
+**user_id**, name, password, email, phone_no  
 
 ## Airports
 **airport_id**, name, location  

@@ -2,12 +2,13 @@
 import { useState } from "react";
 
 function SignupCard({ onClose }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSignup = async () => {
-    if (!email || !phoneNo || !password) {
+    if (!name || !email || !phoneNo || !password) {
       alert("Please fill in all fields.");
       return;
     }
@@ -16,7 +17,7 @@ function SignupCard({ onClose }) {
       const response = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, phone_no: phoneNo, password }),
+        body: JSON.stringify({ name, email, phone_no: phoneNo, password }),
       });
 
       const data = await response.json();
@@ -41,6 +42,15 @@ function SignupCard({ onClose }) {
         ✖
       </button>
       <h2 className="text-xl font-bold mb-4">Sign up</h2>
+
+      <input 
+        type="text" 
+        placeholder="Name" 
+        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
       <input 
         type="text" 
         placeholder="Email" 
@@ -48,6 +58,7 @@ function SignupCard({ onClose }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
+
       <input 
         type="text" 
         placeholder="Phone Number" 
@@ -55,6 +66,7 @@ function SignupCard({ onClose }) {
         value={phoneNo}
         onChange={(e) => setPhoneNo(e.target.value)}
       />
+
       <input 
         type="password" 
         placeholder="Password" 
@@ -62,6 +74,7 @@ function SignupCard({ onClose }) {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+
       <button 
         className="w-full bg-[#605DEC] text-white py-2 rounded mb-3"
         onClick={handleSignup}
