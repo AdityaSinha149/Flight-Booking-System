@@ -11,10 +11,10 @@ export async function POST(req) {
     }
 
     connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "sinha",
-      database: "airline_booking",
+      host: process.env.MYSQLHOST,
+      user: process.env.MYSQLUSER,
+      password: process.env.MYSQLPASSWORD,
+      database: process.env.MYSQLDATABASE,
     });
 
     console.log("Connected to DB successfully");
@@ -24,13 +24,14 @@ export async function POST(req) {
 
     if (username.includes('@')) {
       query += "email = ?";
+      queryParams = [username];
     } else {
-        query += "phone_no = ?";
+      query += "phone_no = ?";
+      queryParams = [username];
     }
-    queryParams = [username];
 
     const [user] = await connection.execute(query, queryParams);
-    
+
     if (!user.length) {
       connection.end();
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -43,8 +44,8 @@ export async function POST(req) {
     }
 
     connection.end();
-    return NextResponse.json({ 
-      message: "Sign-in successful!", 
+    return NextResponse.json({
+      message: "Sign-in successful!",
       userId: user[0].user_id,
       name: user[0].name,
       email: user[0].email,

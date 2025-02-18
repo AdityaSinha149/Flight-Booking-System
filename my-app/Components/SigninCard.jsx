@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
+import { useAuth } from "@/app/AuthContext";
 
-function SigninCard({ onClose }) {
+function SigninCard() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { toggleSigninVisibility } = useAuth();
 
   const handleSignin = async () => {
     if (!username || !password) {
@@ -23,7 +25,7 @@ function SigninCard({ onClose }) {
       const data = await response.json();
       if (response.ok) {
         alert("Signin successful!");
-        onClose();
+        toggleSigninVisibility();
       } else {
         alert(data.error || "Signin failed.");
       }
@@ -39,7 +41,7 @@ function SigninCard({ onClose }) {
     <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-[400px] relative text-black dark:text-white">
       <button 
         className="absolute top-2 right-2 text-black dark:text-white hover:text-gray-700 dark:hover:text-gray-300" 
-        onClick={onClose}
+        onClick={toggleSigninVisibility}
         disabled={loading}
       >
         ✖

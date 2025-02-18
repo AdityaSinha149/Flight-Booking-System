@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
+import { useAuth } from "@/app/AuthContext";
 
-function SignupCard({ onClose }) {
+function SignupCard() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { toggleSignupVisibility } = useAuth();
 
   const handleSignup = async () => {
     if (!name || !email || !phoneNo || !password) {
@@ -26,7 +28,7 @@ function SignupCard({ onClose }) {
       const data = await response.json();
       if (response.ok) {
         alert("Signup successful!");
-        onClose();
+        toggleSignupVisibility();
       } else {
         alert(data.error || "Signup failed.");
       }
@@ -42,7 +44,7 @@ function SignupCard({ onClose }) {
     <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-[400px] relative text-black dark:text-white">
       <button 
         className="absolute top-2 right-2 text-black dark:text-white hover:text-gray-700 dark:hover:text-gray-300" 
-        onClick={onClose}
+        onClick={toggleSignupVisibility}
       >
         ✖
       </button>

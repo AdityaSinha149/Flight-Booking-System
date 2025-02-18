@@ -5,11 +5,11 @@ import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import SignupCard from "../components/SignupCard";
 import SigninCard from "../components/SigninCard";
+import { useAuth } from "./AuthContext";
 
 
 function Homepage() {
-  const [isSignupVisible, setSignupVisible] = useState(false);
-  const [isSigninVisible, setSigninVisible] = useState(false);
+  const { isSignupVisible, isSigninVisible } = useAuth();
 
   return (
     <div className="h-screen flex flex-col relative">
@@ -17,8 +17,6 @@ function Homepage() {
         Join Tripma today and save up to 20% on your flight using code TRAVEL at checkout. Promotion valid for new users only.
       </div>
       <Navbar 
-        onSignupClick={() => setSignupVisible(true)} 
-        onSigninClick={() => setSigninVisible(true)} 
       />
       <div
         className="w-full bg-cover bg-center flex-1"
@@ -35,17 +33,15 @@ function Homepage() {
         </div>
       </div>
 
-      {/* Signup Modal */}
       {isSignupVisible && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-          <SignupCard onClose={() => setSignupVisible(false)} />
+          <SignupCard />
         </div>
       )}
 
-      {/* Signin Modal */}
       {isSigninVisible && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-          <SigninCard onClose={() => setSigninVisible(false)} />
+          <SigninCard />
         </div>
       )}
     </div>
