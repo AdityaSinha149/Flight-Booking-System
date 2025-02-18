@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import styles from "./Homepage.module.css";
-import Navbar from "@/Components/Navbar";
-import SearchBar from "@/Components/SearchBar";
-import SignupCard from "@/Components/SignupCard";
-import SigninCard from "@/Components/SigninCard"; // Import Sign-in Card
+import Navbar from "../components/Navbar";
+import SearchBar from "../components/SearchBar";
+import SignupCard from "../components/SignupCard";
+import SigninCard from "../components/SigninCard";
+
 
 function Homepage() {
   const [isSignupVisible, setSignupVisible] = useState(false);
