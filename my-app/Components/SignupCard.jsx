@@ -6,12 +6,15 @@ function SignupCard({ onClose }) {
   const [email, setEmail] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
     if (!name || !email || !phoneNo || !password) {
       alert("Please fill in all fields.");
       return;
     }
+
+    setLoading(true);
 
     try {
       const response = await fetch("/api/signup", {
@@ -31,6 +34,8 @@ function SignupCard({ onClose }) {
       console.error("Signup error:", error);
       alert("An error occurred. Please try again.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -49,6 +54,7 @@ function SignupCard({ onClose }) {
         className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        disabled={loading}
       />
 
       <input 
@@ -57,6 +63,7 @@ function SignupCard({ onClose }) {
         className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        disabled={loading}
       />
 
       <input 
@@ -65,6 +72,7 @@ function SignupCard({ onClose }) {
         className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
         value={phoneNo}
         onChange={(e) => setPhoneNo(e.target.value)}
+        disabled={loading}
       />
 
       <input 
@@ -73,13 +81,15 @@ function SignupCard({ onClose }) {
         className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        disabled={loading}
       />
 
       <button 
-        className="w-full bg-[#605DEC] text-white py-2 rounded mb-3"
+        className="w-full bg-[#605DEC] text-white py-2 rounded mb-3 flex justify-center items-center"
         onClick={handleSignup}
+        disabled={loading}
       >
-        Create Account
+        {loading ? <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5"></span> : "Create Account"}
       </button>
     </div>
   );

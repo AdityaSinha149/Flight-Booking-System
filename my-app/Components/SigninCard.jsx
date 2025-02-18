@@ -2,8 +2,9 @@
 import { useState } from "react";
 
 function SigninCard({ onClose }) {
-  const [username, setUsername] = useState(""); // Can be email or phone number
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignin = async () => {
     if (!username || !password) {
@@ -11,6 +12,7 @@ function SigninCard({ onClose }) {
       return;
     }
 
+    setLoading(true);
     try {
       const response = await fetch("/api/signin", {
         method: "POST",
@@ -28,6 +30,8 @@ function SigninCard({ onClose }) {
     } catch (error) {
       console.error("Signin error:", error);
       alert("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,6 +40,7 @@ function SigninCard({ onClose }) {
       <button 
         className="absolute top-2 right-2 text-black dark:text-white hover:text-gray-700 dark:hover:text-gray-300" 
         onClick={onClose}
+        disabled={loading}
       >
         ✖
       </button>
@@ -47,6 +52,7 @@ function SigninCard({ onClose }) {
         className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        disabled={loading}
       />
 
       <input 
@@ -55,13 +61,15 @@ function SigninCard({ onClose }) {
         className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded mb-3 bg-white dark:bg-gray-800 text-black dark:text-white"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        disabled={loading}
       />
 
       <button 
-        className="w-full bg-[#605DEC] text-white py-2 rounded mb-3"
+        className="w-full bg-[#605DEC] text-white py-2 rounded mb-3 flex items-center justify-center"
         onClick={handleSignin}
+        disabled={loading}
       >
-        Sign In
+        {loading ? <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5"></span> : "Sign In"}
       </button>
     </div>
   );
