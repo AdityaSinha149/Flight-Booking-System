@@ -18,7 +18,7 @@ export default function SearchBar() {
 
   const router = useRouter();
 
-  const handleSearch= () => {
+  const handleSearch = () => {
     router.push("/Flights");
   };
 
@@ -181,7 +181,8 @@ export default function SearchBar() {
         </div>
 
         {/* Search Button */}
-        <button className="bg-[#605DEC] text-white px-6 py-3 rounded-md -ml-2">
+        <button className="bg-[#605DEC] text-white px-6 py-3 rounded-md -ml-2"
+          onClick={handleSearch}>
           Search
         </button>
       </div>
