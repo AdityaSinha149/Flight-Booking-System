@@ -10,13 +10,12 @@ function Navbar() {
 
   return (
     <nav className={`border-[#605DEC] border-b-4 ${dark ? "bg-gray-900" : "bg-gray-300"} h-[4rem] flex justify-between items-center px-10`}>
-      {/* Logo */}
       <img src="/logo.png" alt="Logo" className="w-[7rem] h-auto" />
 
       {loggedIn ? (
         <>
           {/* Welcome Message */}
-          <h1 className={`text-2xl font-bold ${dark ? "text-gray-500" : "text-black"}`}>Welcome {name}</h1>
+          <h1 className={`text-5xl font-italianno font-bold ${dark ? "text-gray-400" : "text-gray-700"}`}>Welcome {name}</h1>
 
           <div className="flex space-x-4 items-center">
             {/* My Trips */}

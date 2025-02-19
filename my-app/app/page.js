@@ -23,7 +23,7 @@ function Homepage() {
       <Navbar />
 
       <div
-        className={`w-full bg-cover bg-center flex-1 ${dark ? "bg-black opacity-95" : ""}`}
+        className={`w-full bg-cover bg-center flex-1 ${dark ? "bg-[#090909] opacity-95" : ""}`}
         style={{ backgroundImage: "url('/world.png')" }}
       >
         <div className="flex flex-col items-center">

@@ -13,6 +13,7 @@ export default {
       },
       fontFamily: {
         niconne: ["Niconne", "cursive"],
+        italianno: ["italianno", "sans-serif"],
       },
     },
   },
