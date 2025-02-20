@@ -1,7 +1,13 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/*": [
+        "./*"
+      ]
+    },
+    "types": [
+      "node",
+      "normalize-package-data"
+    ]
   }
 }

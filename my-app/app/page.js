@@ -27,10 +27,10 @@ function Homepage() {
         style={{ backgroundImage: "url('/world.png')" }}
       >
         <div className="flex flex-col items-center">
-          <div className={`${dark ? styles.gradientText : styles.gradientTextLight} pt-30 text-9xl font-niconne italic font-bold`}>
+          <div className={`${dark ? styles.gradientText : styles.gradientTextLight} pt-30 text-9xl font-Quintessential italic font-bold`}>
             It's more than
           </div>
-          <div className={`${dark ? styles.gradientText : styles.gradientTextLight} px-4 pb-20 text-9xl font-niconne italic font-bold`}>
+          <div className={`${dark ? styles.gradientText : styles.gradientTextLight} px-4 pb-20 text-9xl font-Quintessential italic font-bold`}>
             just a trip
           </div>
           <SearchBar />
