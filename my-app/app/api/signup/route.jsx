@@ -2,9 +2,18 @@ import { NextResponse } from "next/server";
 import mysql from "mysql2/promise";
 import bcrypt from "bcrypt";
 
+const pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "sinha",
+  database: "airline_booking",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
+
 export async function POST(req) {
   let connection;
-
   try {
     const { name, email, phone_no, password } = await req.json();
 
@@ -12,22 +21,18 @@ export async function POST(req) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
-    // Establish connection to the MySQL database
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-      port: process.env.MYSQLPORT,
-    });
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
 
     // Check if email or phone number already exists
     const [existingUser] = await connection.execute(
-      "SELECT user_id FROM users WHERE email = ? OR phone_no = ?",
+      "SELECT user_id FROM users WHERE email = ? OR phone_no = ?", 
       [email, phone_no]
     );
 
     if (existingUser.length) {
+      await connection.rollback();
+      connection.release();
       return NextResponse.json({ error: "Email or phone number already registered" }, { status: 409 });
     }
 
@@ -36,22 +41,21 @@ export async function POST(req) {
 
     // Insert the new user
     const [result] = await connection.execute(
-      "INSERT INTO users (name, email, phone_no, password) VALUES (?, ?, ?, ?)",
+      "INSERT INTO users (name, email, phone_no, password) VALUES (?, ?, ?, ?)", 
       [name, email, phone_no, hashedPassword]
     );
 
-    // Close the connection
-    await connection.end();
-
+    await connection.commit();
+    connection.release();
+    
     return NextResponse.json({ message: "Signup successful!", userId: result.insertId }, { status: 201 });
 
   } catch (error) {
     console.error("Database Error:", error);
-    
     if (connection) {
-      await connection.end();  // Close connection in case of error
+      await connection.rollback();
+      connection.release();
     }
-
     return NextResponse.json({ error: "Database error", details: error.message }, { status: 500 });
   }
 }

@@ -3,14 +3,20 @@ import React from "react";
 import { useAuth } from "@/app/AuthContext";
 import { useTheme } from "@/app/ThemeContext";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
 
 function Navbar() {
   const { toggleSignupVisibility, toggleSigninVisibility, loggedIn, toggleLoggedIn, name } = useAuth();
   const { dark, toggleDarkMode } = useTheme();
+  const router = useRouter();
+
+  const handleLogoClick = () => {
+    router.push("/");
+  }
 
   return (
     <nav className={`border-[#605DEC] border-b-4 ${dark ? "bg-gray-900" : "bg-gray-300"} h-[4rem] flex justify-between items-center px-10`}>
-      <img src="/logo.png" alt="Logo" className="w-[7rem] h-auto" />
+      <button onClick={handleLogoClick}><img src="/logo.png" alt="Logo" className="w-[7rem] h-auto" /></button>
 
       {loggedIn ? (
         <>
