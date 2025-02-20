@@ -18,7 +18,7 @@ const Flights = () => {
     useEffect(() => {
         const fetchFlights = async () => {
             try {
-                const response = await fetch("/api/flights"); // Replace with actual API endpoint
+                const response = await fetch("/api/flights");
                 if (!response.ok) {
                     throw new Error("Failed to fetch flight data");
                 }
@@ -43,18 +43,16 @@ const Flights = () => {
             </div>
 
             {/* Flight Cards Section */}
-            <div className="my-6 px-4 py-6 max-h-[500px] overflow-y-auto">
-                {loading ? (
-                    <p className="text-center text-gray-500">Loading flights...</p>
-                ) : error ? (
-                    <p className="text-center text-red-500">{error}</p>
-                ) : flights.length > 0 ? (
-                    flights.map(flight => (
-                        <FlightCard key={flight.id} flight={flight} />
-                    ))
-                ) : (
-                    <p className="text-center text-gray-500">No flights available</p>
-                )}
+            <div className="my-6 px-40 py-10 max-h-[500px] overflow-y-auto">
+                {loading ? <p className="text-center text-gray-500">Loading flights...</p> :
+                    error ? <p className="text-center text-red-500">{error}</p> :
+                        flights.length > 0 ?
+                            flights.map(flight => (
+                                <FlightCard key={flight.id} flight={flight} />
+                            ))
+                            :
+                            <p className="text-center text-gray-500">No flights available</p>
+                }
             </div>
 
             {isSignupVisible && (
