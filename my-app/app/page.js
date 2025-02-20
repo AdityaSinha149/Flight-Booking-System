@@ -1,12 +1,11 @@
 "use client";
-import React from "react";
-import styles from "./Homepage.module.css";
+import { useTheme } from "./ThemeContext";
+import { useAuth } from "./AuthContext";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import SignupCard from "../components/SignupCard";
 import SigninCard from "../components/SigninCard";
-import { useAuth } from "./AuthContext";
-import { useTheme } from "./ThemeContext";
+import styles from "./Homepage.module.css";
 
 function Homepage() {
   const { dark } = useTheme();
@@ -14,11 +13,11 @@ function Homepage() {
 
   return (
     <div className="h-screen flex flex-col relative">
-      {!loggedIn &&
+      {!loggedIn && (
         <div className="bg-[#605DEC] h-12 text-white flex justify-center items-center">
           Join Tripma today and save up to 20% on your flight using code TRAVEL at checkout. Promotion valid for new users only.
         </div>
-      }
+      )}
 
       <Navbar />
 

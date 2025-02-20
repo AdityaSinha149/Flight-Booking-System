@@ -68,3 +68,6 @@ CREATE TABLE Pays (
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (payment_id) REFERENCES Payments(payment_id)
 );
+
+
+

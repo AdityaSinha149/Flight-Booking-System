@@ -2,23 +2,60 @@
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/app/ThemeContext";
 import { useRouter } from "next/navigation";
+import { useFlights } from "@/app/FlightContext";
+import { useSearch } from "@/app/SearchContext";
 
 
 export default function SearchBar() {
   const { dark } = useTheme();
   const [locations, setLocations] = useState([]);
-  const [fromInput, setFromInput] = useState("");
-  const [toInput, setToInput] = useState("");
   const [showFromDropdown, setShowFromDropdown] = useState(false);
   const [showToDropdown, setShowToDropdown] = useState(false);
-  const [date, setDate] = useState("");
+  const { fromInput, setFromInput, toInput, setToInput, date, setDate, passengerCount, setPassengerCount } = useSearch();
+  const { setFlights, setLoading, setError } = useFlights();
 
   const fromRef = useRef(null);
   const toRef = useRef(null);
 
   const router = useRouter();
 
+  const formatAirport = (loc) => {
+    const i = loc.indexOf("(");
+    const j = loc.indexOf(")");
+    return loc.substring(i + 1, j);
+  };
+
+
+  const fetchFlights = async () => {
+    try {
+      const response = await fetch("/api/flights", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          start_airport: formatAirport(fromInput),
+          end_airport: formatAirport(toInput),
+          travel_date: date
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch flight data");
+      }
+
+      const data = await response.json();
+      setFlights(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const handleSearch = () => {
+    fetchFlights();
     router.push("/Flights");
   };
 
@@ -175,8 +212,9 @@ export default function SearchBar() {
           <input
             type="text"
             placeholder="1 adult"
-            className={`w-full bg-transparent outline-none ${dark ? "text-white" : "text-gray-600"
-              }`}
+            className={`w-full bg-transparent outline-none ${dark ? "text-white" : "text-gray-600"}`}
+            value={passengerCount}
+            onChange={(e) => setPassengerCount(e.target.value)}
           />
         </div>
 

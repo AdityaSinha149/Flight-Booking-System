@@ -7,7 +7,7 @@ const FlightCard = ({ flight }) => {
       <div className="flex items-center gap-3">
         <img
           src={`/flights/${flight.airline.split(" ")[0]}.png`}
-          alt={flight.airline}
+          alt="Airline Logo"
           className="w-10 h-10 rounded-full"
         />
 
