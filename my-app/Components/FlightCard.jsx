@@ -25,7 +25,7 @@ const FlightCard = ({ flight }) => {
 
       {/* Price */}
       <div className="flex flex-col items-end">
-        <p className="text-gray-800 font-semibold">${flight.price}</p>
+        <p className="text-gray-800 font-semibold">₹{flight.price}</p>
         <p className="text-blue-600 text-sm">round trip</p>
       </div>
     </div>
