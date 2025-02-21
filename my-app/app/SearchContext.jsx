@@ -10,7 +10,7 @@ export const SearchProvider = ({ children }) => {
     const [fromInput, setFromInput] = useState("");
     const [toInput, setToInput] = useState("");
     const [date, setDate] = useState("");
-    const [passengerCount, setPassengerCount] = useState(1);
+    const [passengerCount, setPassengerCount] = useState("");
 
 
 

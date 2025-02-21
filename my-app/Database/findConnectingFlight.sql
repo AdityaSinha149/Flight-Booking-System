@@ -1,56 +1,32 @@
-DELIMITER $$
+DELIMITER //
 
-CREATE PROCEDURE GETDIRECTFLIGHTS(
+CREATE PROCEDURE FindDirectFlights(
     IN start_airport VARCHAR(3),
     IN end_airport VARCHAR(3),
-    IN travel_date DATE
+    IN start_date DATETIME
 )
 BEGIN
-    -- Temporary table to store direct flight results
-    CREATE TEMPORARY TABLE IF NOT EXISTS temp_direct_flights (
-        flight_no INT,
-        airline VARCHAR(255),
-        departure_time DATETIME,
-        arrival_time DATETIME,
-        departure_airport_id VARCHAR(3),
-        arrival_airport_id VARCHAR(3),
-        price DECIMAL(10, 2)
-    );
-
-    -- Fetch direct flights into temp_direct_flights
-    INSERT INTO temp_direct_flights (flight_no, airline, departure_time, arrival_time, departure_airport_id, arrival_airport_id, price)
     SELECT 
-        fs.flight_no,
-        f.airline,
-        fs.departure_time,
-        fs.arrival_time,
-        fs.departure_airport_id,
-        fs.arrival_airport_id,
-        fs.price
-    FROM flights f
-    JOIN flightschedule fs ON f.flight_no = fs.flight_no
-    WHERE fs.departure_airport_id = start_airport
-      AND fs.arrival_airport_id = end_airport
-      AND DATE(fs.departure_time) = travel_date;
-
-    -- Fetch and format the direct flights from the temporary table
-    SELECT
         f.airline AS airline,
-        TIMEDIFF(fs.arrival_time, fs.departure_time) AS duration,
+        fs.departure_airport_id AS departure_airport,
+        fs.arrival_airport_id AS arrival_airport,
+        TIME_FORMAT(TIMEDIFF(fs.arrival_time, fs.departure_time), '%H:%i:%s') AS duration,
         DATE_FORMAT(fs.departure_time, '%h:%i%p') AS departure,
         DATE_FORMAT(fs.arrival_time, '%h:%i%p') AS arrival,
+        start_airport AS layover_chain,
         'Direct' AS stops,
-        'No layover' AS layover,
-        fs.price AS price
-    FROM temp_direct_flights fs
-    JOIN flights f ON fs.flight_no = f.flight_no;
-
-    -- Drop the temporary table after the procedure completes
-    DROP TEMPORARY TABLE IF EXISTS temp_direct_flights;
-
-END $$
+        'Direct' AS layover_text,
+        FORMAT(fs.price, 2) AS price
+    FROM FLIGHTSCHEDULE fs
+    JOIN FLIGHTS f ON fs.flight_no = f.flight_no
+    WHERE fs.departure_airport_id = start_airport
+      AND fs.arrival_airport_id = end_airport
+      AND fs.departure_time >= start_date
+    ORDER BY fs.departure_time;
+END //
 
 DELIMITER ;
+
 
 
 DELIMITER $$
@@ -122,7 +98,7 @@ BEGIN
         FROM flights f2
         JOIN flightschedule fs2 ON f2.flight_no = fs2.flight_no
         JOIN connecting_flights cf ON fs2.departure_airport_id = cf.intermediate_airport_id
-        WHERE cf.num_stops < 2  -- Limit to 2 stops
+        WHERE cf.num_stops <= 2  -- Limit to 2 stops
     )
 
     -- Fetch connecting flights from the recursive query and format output

@@ -11,6 +11,8 @@ export default function SearchBar() {
   const [locations, setLocations] = useState([]);
   const [showFromDropdown, setShowFromDropdown] = useState(false);
   const [showToDropdown, setShowToDropdown] = useState(false);
+  const [selectedFromIndex, setSelectedFromIndex] = useState(-1);
+  const [selectedToIndex, setSelectedToIndex] = useState(-1);
   const { fromInput, setFromInput, toInput, setToInput, date, setDate, passengerCount, setPassengerCount } = useSearch();
   const { setFlights, setLoading, setError } = useFlights();
 
@@ -41,7 +43,8 @@ export default function SearchBar() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch flight data");
+        alert("Error fetching flights");
+        return;
       }
 
       const data = await response.json();
@@ -77,6 +80,29 @@ export default function SearchBar() {
 
   const filteredFrom = filterLocations(fromInput);
   const filteredTo = filterLocations(toInput);
+
+  const handleKeyDown = (e) => {
+    if (showToDropdown) {
+      if (e.key === "ArrowDown") {
+        setSelectedToIndex((prev) => Math.min(prev + 1, filteredTo.length - 1));
+      } else if (e.key === "ArrowUp") {
+        setSelectedToIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === "Enter" && selectedToIndex !== -1) {
+        setToInput(formatLocation(filteredTo[selectedToIndex]));
+        setShowToDropdown(false);
+      }
+    }
+    else {
+      if (e.key === "ArrowDown") {
+        setSelectedFromIndex((prev) => Math.min(prev + 1, filteredFrom.length - 1));
+      } else if (e.key === "ArrowUp") {
+        setSelectedFromIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === "Enter" && selectedFromIndex !== -1) {
+        setFromInput(formatLocation(filteredFrom[selectedFromIndex]));
+        setShowFromDropdown(false);
+      }
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -115,9 +141,12 @@ export default function SearchBar() {
               setShowToDropdown(false);
             }}
             onFocus={() => {
+              setFromInput("");
               setShowFromDropdown(true);
               setShowToDropdown(false);
+              setSelectedFromIndex(-1);
             }}
+            onKeyDown={handleKeyDown}
           />
           {showFromDropdown && (
             <ul
@@ -161,9 +190,13 @@ export default function SearchBar() {
               setShowFromDropdown(false);
             }}
             onFocus={() => {
+              setToInput("");
               setShowToDropdown(true);
               setShowFromDropdown(false);
+              setSelectedToIndex(-1);
             }}
+            onKeyDown={handleKeyDown}
+
           />
           {showToDropdown && (
             <ul
@@ -219,7 +252,7 @@ export default function SearchBar() {
         </div>
 
         {/* Search Button */}
-        <button className="bg-[#605DEC] text-white px-6 py-3 rounded-md -ml-2"
+        <button className="bg-[#605DEC] text-white px-6 py-3 rounded-md hover:bg-[#4d4aa8] hover:transform hover:scale-110 transition"
           onClick={handleSearch}>
           Search
         </button>

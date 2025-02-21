@@ -25,7 +25,7 @@ export async function POST(request) {
       console.log("Connected successfully!");
   
       console.log(`Executing stored procedure with params:`, start_airport, end_airport, travel_date);
-      const [rows] = await db.execute("CALL GETCONNECTINGFLIGHTS(?, ?, ?)", [
+      const [rows] = await db.execute("CALL FindDirectFlights(?, ?, ?)", [
         start_airport,
         end_airport,
         travel_date,

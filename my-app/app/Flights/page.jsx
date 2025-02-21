@@ -30,7 +30,9 @@ const Flights = () => {
           <p className="text-center text-red-500">{error}</p>
         ) : flights.length > 0 ? (
           flights.map((flight, index) => (
-            <FlightCard key={index} flight={flight} />
+            <div key={index} className='hover:transform hover:scale-110 transi'>
+              <FlightCard hover={`${dark ? "hover:bg-gray-700" : "hover:bg-gray-300"}`} flight={flight} />
+            </div>
           ))
         ) : (
           <p className="text-center text-gray-500">No flights available</p>
@@ -50,7 +52,10 @@ const Flights = () => {
           <SigninCard />
         </div>
       )}
+
     </div>
+
+
   );
 };
 

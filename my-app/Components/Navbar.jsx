@@ -25,11 +25,11 @@ function Navbar() {
 
           <div className="flex space-x-4 items-center">
             {/* My Trips */}
-            <button className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline`}>My Trips</button>
+            <button className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline hover:transform hover:scale-110 transition`}>My Trips</button>
 
             {/* Sign Out Button */}
             <button
-              className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md"
+              className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md hover:bg-[#4d4aa8] hover:transform hover:scale-110 transition"
               onClick={toggleLoggedIn}
             >
               Sign out
@@ -51,13 +51,13 @@ function Navbar() {
       ) : (
         <div className="flex space-x-4 items-center">
           {/* Sign In Button */}
-          <button onClick={toggleSigninVisibility} className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline`}>
+          <button onClick={toggleSigninVisibility} className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline hover:transform hover:scale-110 transition`}>
             Sign in
           </button>
 
           {/* Sign Up Button */}
           <button
-            className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md"
+            className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md hover:bg-[#4d4aa8] hover:transform hover:scale-110 transition"
             onClick={toggleSignupVisibility}
           >
             Sign up
