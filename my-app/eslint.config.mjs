@@ -13,5 +13,8 @@ export default compat.config({
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
+    ecmaFeatures: {
+      jsx: true, // enable JSX parsing
+    },
   },
 }, "next", "turbo", "prettier");
