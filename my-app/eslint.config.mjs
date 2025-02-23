@@ -17,4 +17,4 @@ export default compat.config({
       jsx: true, // enable JSX parsing
     },
   },
-}, "next", "turbo", "prettier");
+}, "next/core-web-vitals", "turbo", "prettier");
