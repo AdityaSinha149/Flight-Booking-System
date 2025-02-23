@@ -11,8 +11,7 @@ export const SearchProvider = ({ children }) => {
     const [toInput, setToInput] = useState("");
     const [date, setDate] = useState("");
     const [passengerCount, setPassengerCount] = useState("");
-
-
+    const [error, setError] = useState(""); // added search error state
 
     const value = {
         fromInput,
@@ -23,6 +22,8 @@ export const SearchProvider = ({ children }) => {
         setDate,
         passengerCount,
         setPassengerCount,
+        error,
+        setError,
     };
 
     return (

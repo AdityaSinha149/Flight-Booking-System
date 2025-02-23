@@ -1,11 +1,14 @@
 "use client";
-import { useTheme } from "./ThemeContext";
-import { useAuth } from "./AuthContext";
-import Navbar from "../components/Navbar";
-import SearchBar from "../components/SearchBar";
-import SignupCard from "../components/SignupCard";
-import SigninCard from "../components/SigninCard";
 import styles from "./Homepage.module.css";
+
+import Navbar from "@/Components/Navbar";
+import SearchBar from "@/Components/SearchBar";
+import SignupCard from "@/Components/SignupCard";
+import SigninCard from "@/Components/SigninCard";
+
+import { useAuth } from "@/Contexts/AuthContext";
+import { useTheme } from "@/Contexts/ThemeContext";
+
 
 function Homepage() {
   const { dark } = useTheme();
@@ -25,11 +28,13 @@ function Homepage() {
         className={`w-full bg-cover bg-center flex-1 ${dark ? "bg-[#090909] opacity-95" : ""}`}
         style={{ backgroundImage: "url('/world.png')" }}
       >
+      <div className={`h-[38px] bg-transparent`}>
+      </div>
         <div className="flex flex-col items-center">
-          <div className={`${dark ? styles.gradientText : styles.gradientTextLight} pt-30 text-9xl font-Quintessential italic font-bold`}>
+          <div className={`${dark ? styles.gradientText : styles.gradientTextLight} pt-30  text-6xl sm:text-8xl md:text-9xl font-merriweather font-extrabold px-4`}>
             It's more than
           </div>
-          <div className={`${dark ? styles.gradientText : styles.gradientTextLight} px-4 pb-20 text-9xl font-Quintessential italic font-bold`}>
+          <div className={`${dark ? styles.gradientText : styles.gradientTextLight} px-20 pb-20  text-6xl sm:text-8xl md:text-9xl font-merriweather font-extrabold`}>
             just a trip
           </div>
           <SearchBar />

@@ -47,3 +47,9 @@
     background-size: 200% auto;
     animation: gradientShiftLight 6s linear infinite;
 }
+
+.fontCorinthia {
+  font-family: 'Corinthia', cursive;
+  line-height: 0.6; /* Decrease line height to reduce space between lines */
+  padding-top: 2rem; /* Add padding to create space from the navbar */
+}

@@ -1,8 +1,8 @@
 import "./globals.css";
-import { AuthProvider } from './AuthContext';
-import { ThemeProvider } from './ThemeContext';
-import { SearchProvider } from './SearchContext';
-import { FlightProvider } from "./FlightContext";
+import { AuthProvider } from "@/Contexts/AuthContext";
+import { ThemeProvider } from "@/Contexts/ThemeContext";
+import { SearchProvider } from "@/Contexts/SearchContext";
+import { FlightProvider } from "@/Contexts/FlightContext";
 
 export const metadata = {
   title: "Tripma - Your Traver Buddy",

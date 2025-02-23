@@ -1,4 +1,3 @@
-// AuthContext.jsx
 "use client";
 
 import { createContext, useState, useContext } from 'react';
@@ -14,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [name, setName] = useState('');
 
   const toggleLoggedIn = () => {
-    if(loggedIn)setName('');
+    if(loggedIn) setName('');
     setLoggedIn(!loggedIn);
   };
 

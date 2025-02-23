@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource/corinthia": "^4.5.8",
     "@fontsource/italianno": "^5.1.1",
+    "@fontsource/merriweather": "^5.1.1",
+    "@fontsource/newsreader": "^5.1.1",
     "@fontsource/niconne": "^5.1.1",
     "@heroicons/react": "^2.2.0",
     "@next/font": "^14.2.15",

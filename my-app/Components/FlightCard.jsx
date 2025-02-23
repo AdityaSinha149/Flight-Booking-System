@@ -1,13 +1,17 @@
 import React from "react";
-import { useTheme } from "@/app/ThemeContext";
+import { useTheme } from "@/Contexts/ThemeContext";
 
-const FlightCard = ({ flight, hover }) => {
+const FlightCard = ({ flight, hover, isSelected }) => {
   const { dark } = useTheme();
+  // Selected background:
+  const selectedBg = dark ? "bg-gray-700" : "bg-gray-300";
 
   return (
     <div
-      className={`grid grid-cols-3 items-center shadow-lg rounded-lg p-4 mb-4 border ${hover} ${dark ? "bg-[#1f1f1f] border-gray-700" : "bg-white border-gray-200"
-        }`}
+      className={`grid grid-cols-1 sm:grid-cols-3 gap-4 items-center shadow-lg rounded-lg p-2 sm:p-4 mb-4 border
+        ${hover}
+        ${dark ? "border-gray-700" : "border-gray-200"}
+        ${isSelected ? selectedBg : ""}`}
     >
       {/* Airline Logo & Name */}
       <div className="flex items-center gap-4">
@@ -22,7 +26,7 @@ const FlightCard = ({ flight, hover }) => {
       </div>
 
       {/* Flight Details */}
-      <div className="flex items-center gap-5 justify-center">
+      <div className="flex flex-col sm:flex-row items-center gap-5 justify-center">
         {/* Departure Info */}
         <div className="text-center">
           <p

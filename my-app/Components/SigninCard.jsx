@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
-import { useAuth } from "@/app/AuthContext";
-import { useTheme } from "@/app/ThemeContext";
+
+import { useAuth } from "@/Contexts/AuthContext";
+import { useTheme } from "@/Contexts/ThemeContext";
 
 function SigninCard() {
   const [username, setUsername] = useState("");

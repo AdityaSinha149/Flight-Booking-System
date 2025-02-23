@@ -14,6 +14,9 @@ export default {
       fontFamily: {
         niconne: ["Niconne", "cursive"],
         italianno: ["italianno", "sans-serif"],
+        quintessential: ["Quintessential", "cursive"],
+        merriweather: ["Merriweather", "serif"],
+        newsreader: ["Newsreader", "serif"],
       },
     },
   },
