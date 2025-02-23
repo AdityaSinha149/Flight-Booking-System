@@ -9,9 +9,9 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-export default compat.extend("next", "turbo", "prettier", {
+export default compat.config({
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-});
+}, "next", "turbo", "prettier");
