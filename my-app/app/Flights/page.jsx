@@ -20,8 +20,8 @@ const Flights = () => {
   const isAnimatingRef = useRef(false);
   const isPressingKeysRef = useRef(false);
   const hoverTimeoutRef = useRef(null);
-  const isMouseHoveredRef = useRef(false);  // NEW: track if mouse is over a card
-  const scrollTimeoutRef = useRef(null);      // NEW: delay scrollIntoView for arrow key selection
+  const isMouseHoveredRef = useRef(false);
+  const scrollTimeoutRef = useRef(null);
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -103,7 +103,6 @@ const Flights = () => {
             >
               <FlightCard
                 flight={flight}
-                hover={`${dark ? "hover:bg-gray-700" : "hover:bg-gray-300"}`}
                 isSelected={index === selectedIndex}
               />
             </div>

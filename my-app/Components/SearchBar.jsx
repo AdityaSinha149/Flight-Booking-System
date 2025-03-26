@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "@/Contexts/ThemeContext";
 import { useFlights } from "@/Contexts/FlightContext";
 import { useSearch } from '@/Contexts/SearchContext';
+import { usePassenger } from "@/Contexts/passengerContext";
 
 export default function SearchBar() {
   const { dark } = useTheme();
@@ -15,6 +16,7 @@ export default function SearchBar() {
   const [selectedToIndex, setSelectedToIndex] = useState(0);
   const { fromInput, setFromInput, toInput, setToInput, date, setDate, passengerCount, setPassengerCount, error, setError } = useSearch();
   const { setFlights, setLoading } = useFlights();
+  const { setFinalPassengerCount } = usePassenger();
 
   const fromRef = useRef(null);
   const toRef = useRef(null);
@@ -72,6 +74,7 @@ export default function SearchBar() {
     setError(""); // Clear previous errors
     const success = await fetchFlights();
     if (success) {
+      setFinalPassengerCount(passengerCount);
       router.push("/Flights");
     }
   };

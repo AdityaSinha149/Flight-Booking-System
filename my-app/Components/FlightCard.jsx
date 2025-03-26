@@ -1,15 +1,24 @@
 import React from "react";
 import { useTheme } from "@/Contexts/ThemeContext";
+import { useFlights } from "@/Contexts/FlightContext";
+import { useRouter } from "next/navigation";
 
-const FlightCard = ({ flight, hover, isSelected }) => {
+const FlightCard = ({ flight, isSelected }) => {
   const { dark } = useTheme();
+  const { selectFlight } = useFlights();
+  const router = useRouter();
   // Selected background:
   const selectedBg = dark ? "bg-gray-700" : "bg-gray-300";
+
+  const handleSelectFlight = () => {
+    selectFlight(flight);
+    router.push('/Passengers');
+  };
 
   return (
     <div
       className={`grid grid-cols-1 sm:grid-cols-3 gap-4 items-center shadow-lg rounded-lg p-2 sm:p-4 mb-4 border
-        ${hover}
+        ${dark ? "hover:bg-gray-700" : "hover:bg-gray-300"}
         ${dark ? "border-gray-700" : "border-gray-200"}
         ${isSelected ? selectedBg : ""}`}
     >
@@ -104,6 +113,7 @@ const FlightCard = ({ flight, hover, isSelected }) => {
           </p>
           <button
             className={`px-4 py-2 mt-2 text-md rounded bg-[#605DEC] font-bold hover:bg-[#4d4aa8] hover:transform hover:scale-125 transition`}
+            onClick={handleSelectFlight}
           >
             <p className="text-white">Select →</p>
           </button>
