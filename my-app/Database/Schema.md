@@ -8,25 +8,7 @@
 **airport_id**, name, location  
 
 ## Flights
-**flight_no**, airline, departure_time, arrival_time, _departure_airport_id_, _arrival_airport_id_  
+**flight_no**, airline, departure_time, arrival_time, _departure_airport_id_, _arrival_airport_id_, max_seats
 
 ## Tickets
-**ticket_no**, ticket_type, seat_number, _user_id_  
-
-## Payments
-**payment_id**, payment_method, transaction_time, transaction_cost, payment_status, _user_id_  
-
-# Relationships
-
-## Books (User → Flight)
-**_user_id_**, **_flight_no_**  
-
-## Buys (User → Ticket)
-**_user_id_**, **_ticket_no_**  
-
-## IssuedFor (Ticket → Flight)
-**_ticket_no_**, **_flight_no_**  
-
-## Pays (User → Payment)
-**_user_id_**, **_payment_id_**  
-
+**ticket_no**, ticket_type, seat_number, _user_id_ , name, email,phone_no, flight_no

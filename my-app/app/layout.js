@@ -3,7 +3,7 @@ import { AuthProvider } from "@/Contexts/AuthContext";
 import { ThemeProvider } from "@/Contexts/ThemeContext";
 import { SearchProvider } from "@/Contexts/SearchContext";
 import { FlightProvider } from "@/Contexts/FlightContext";
-import { PassengerProvider } from "../Contexts/passengerContext";
+import { PassengerProvider } from "@/Contexts/passengerContext";
 
 export const metadata = {
   title: "Tripma - Your Traver Buddy",

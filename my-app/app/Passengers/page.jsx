@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect } from 'react';
+import PassengerCard from '@/Components/PassengerCard';
+
 import { useFlights } from '@/Contexts/FlightContext';
 import { usePassenger } from '@/Contexts/PassengerContext';
 import { useTheme } from '@/Contexts/ThemeContext';
@@ -10,9 +12,10 @@ const PassengersPage = () => {
   const { selectedFlight } = useFlights();
   const { 
     passengers, 
-    finalPassengerCount, 
-    addPassenger, 
-    updatePassenger 
+    finalPassengerCount,
+    updatePassenger,
+    setFinalPassengerCount,
+    setPassengers
   } = usePassenger();
   const { dark } = useTheme();
   const router = useRouter();
@@ -25,7 +28,8 @@ const PassengersPage = () => {
   }, [selectedFlight, router]);
 
   const handleInputChange = (index, field, value) => {
-    updatePassenger(index, field, value);
+    const updatedPassenger = { ...passengers[index], [field]: value };
+    updatePassenger(index, updatedPassenger);
   };
 
   const handleSubmit = (e) => {
@@ -47,49 +51,12 @@ const PassengersPage = () => {
         key={i} 
         className={`mb-6 p-6 rounded-lg shadow ${dark ? 'bg-gray-800' : 'bg-white'}`}
       >
-        <h2 className="text-xl font-semibold mb-4">Passenger {i + 1}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-2">First Name</label>
-            <input
-              type="text"
-              value={passengers[i]?.firstName || ''}
-              onChange={(e) => handleInputChange(i, 'firstName', e.target.value)}
-              className={`w-full p-2 rounded border ${dark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-2">Last Name</label>
-            <input
-              type="text"
-              value={passengers[i]?.lastName || ''}
-              onChange={(e) => handleInputChange(i, 'lastName', e.target.value)}
-              className={`w-full p-2 rounded border ${dark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-2">Email Address</label>
-            <input
-              type="email"
-              value={passengers[i]?.email || ''}
-              onChange={(e) => handleInputChange(i, 'email', e.target.value)}
-              className={`w-full p-2 rounded border ${dark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-2">Phone Number</label>
-            <input
-              type="tel"
-              value={passengers[i]?.phone || ''}
-              onChange={(e) => handleInputChange(i, 'phone', e.target.value)}
-              className={`w-full p-2 rounded border ${dark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-              required
-            />
-          </div>
-        </div>
+        <PassengerCard 
+          i={i} 
+          passengers={passengers} 
+          handleInputChange={handleInputChange} 
+          dark={dark} 
+        />
       </div>
     );
   }
@@ -119,13 +86,6 @@ const PassengersPage = () => {
           {passengerCards}
           
           <div className="flex justify-between mt-4">
-            <button
-              type="button"
-              onClick={addPassenger}
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-            >
-              Add Passenger
-            </button>
             
             <button
               type="submit"

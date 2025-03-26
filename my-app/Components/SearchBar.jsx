@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "@/Contexts/ThemeContext";
 import { useFlights } from "@/Contexts/FlightContext";
 import { useSearch } from '@/Contexts/SearchContext';
-import { usePassenger } from "@/Contexts/passengerContext";
+import { usePassenger } from "@/Contexts/PassengerContext";
 
 export default function SearchBar() {
   const { dark } = useTheme();
