@@ -11,7 +11,7 @@ function SignupCard() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { toggleSignupVisibility, setName, toggleLoggedIn } = useAuth();
+  const { toggleSignupVisibility, setName, toggleLoggedIn, setId } = useAuth();
   const { dark } = useTheme();
 
   const handleSignup = async () => {
@@ -32,6 +32,7 @@ function SignupCard() {
 
       const data = await response.json();
       if (response.ok) {
+        setId(data.userId);
         setName(userName);
         toggleLoggedIn();
         toggleSignupVisibility();

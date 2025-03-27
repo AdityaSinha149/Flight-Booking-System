@@ -9,7 +9,7 @@ function SigninCard() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { toggleSigninVisibility, setName, toggleLoggedIn } = useAuth();
+  const { toggleSigninVisibility, setName, toggleLoggedIn, setId } = useAuth();
   const { dark } = useTheme();
 
   const handleSignin = async () => {
@@ -29,6 +29,7 @@ function SigninCard() {
 
       const data = await response.json();
       if (response.ok) {
+        setId(data.userId);
         setName(data.name);
         toggleLoggedIn();
         toggleSigninVisibility();

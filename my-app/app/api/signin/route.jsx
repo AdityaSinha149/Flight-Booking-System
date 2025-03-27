@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import mysql from "mysql2/promise";
 import bcrypt from "bcrypt";
 
+const pool = mysql.createPool({
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
+
 export async function POST(req) {
   let connection;
   try {
@@ -10,12 +20,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
     }
 
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-    });
+    connection = await pool.getConnection();
 
     console.log("Connected to DB successfully");
 
@@ -33,17 +38,17 @@ export async function POST(req) {
     const [user] = await connection.execute(query, queryParams);
 
     if (!user.length) {
-      connection.end();
+      connection.release();
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user[0].password);
     if (!isPasswordCorrect) {
-      connection.end();
+      connection.release();
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-    connection.end();
+    connection.release();
     return NextResponse.json({
       message: "Sign-in successful!",
       userId: user[0].user_id,
@@ -54,7 +59,7 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("Database Error:", error);
-    if (connection) await connection.end();
+    if (connection) await connection.release();
     return NextResponse.json({ error: "Database error", details: error.message }, { status: 500 });
   }
 }

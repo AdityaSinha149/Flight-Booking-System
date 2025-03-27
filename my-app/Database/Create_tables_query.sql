@@ -1,73 +1,61 @@
-CREATE TABLE Users (
-    user_id INT PRIMARY KEY AUTO_INCREMENT,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone_no VARCHAR(20) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL
-);
+1️⃣ airports Table 
 
-CREATE TABLE Airports (
+CREATE TABLE airports (
     airport_id VARCHAR(3) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     location VARCHAR(255) NOT NULL
 );
+2️⃣ airlines Table 
 
-CREATE TABLE Flights (
-    flight_no INT PRIMARY KEY,
-    airline VARCHAR(100) NOT NULL,
+CREATE TABLE airlines (
+    airline_name VARCHAR(255) PRIMARY KEY
+);
+3️⃣ flights Table 
+
+CREATE TABLE flights (
+    flight_no INT NOT NULL,
+    airline_name VARCHAR(255) NOT NULL,
+    PRIMARY KEY (flight_no, airline_name),
+    FOREIGN KEY (airline_name) REFERENCES airlines(airline_name) ON DELETE CASCADE
+);
+4️⃣ flight_routes Table 
+
+CREATE TABLE flight_routes (
+    route_id INT AUTO_INCREMENT PRIMARY KEY,
+    departure_airport_id VARCHAR(3) NOT NULL,
+    arrival_airport_id VARCHAR(3) NOT NULL,
+    FOREIGN KEY (departure_airport_id) REFERENCES airports(airport_id) ON DELETE CASCADE,
+    FOREIGN KEY (arrival_airport_id) REFERENCES airports(airport_id) ON DELETE CASCADE
+);
+5️⃣ flight_instances Table 
+
+CREATE TABLE flight_instances (
+    instance_id INT AUTO_INCREMENT PRIMARY KEY,
+    flight_no INT NOT NULL,
+    airline_name VARCHAR(255) NOT NULL,
+    route_id INT NOT NULL,
     departure_time DATETIME NOT NULL,
     arrival_time DATETIME NOT NULL,
-    departure_airport_id VARCHAR(3),
-    arrival_airport_id VARCHAR(3),
-    FOREIGN KEY (departure_airport_id) REFERENCES Airports(airport_id),
-    FOREIGN KEY (arrival_airport_id) REFERENCES Airports(airport_id)
+    price DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (flight_no, airline_name) REFERENCES flights(flight_no, airline_name) ON DELETE CASCADE,
+    FOREIGN KEY (route_id) REFERENCES flight_routes(route_id) ON DELETE CASCADE
 );
+6️⃣ users Table 
 
-CREATE TABLE Tickets (
-    ticket_no INT PRIMARY KEY AUTO_INCREMENT,
-    ticket_type VARCHAR(50) NOT NULL
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone_no VARCHAR(20) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
 );
+7️⃣ tickets Table 
 
-CREATE TABLE Payments (
-    payment_id INT PRIMARY KEY AUTO_INCREMENT,
-    payment_method VARCHAR(50) NOT NULL,
-    transaction_time DATETIME NOT NULL,
-    transaction_cost DECIMAL(10,2) NOT NULL,
-    user_id INT,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+CREATE TABLE tickets (
+    ticket_id INT AUTO_INCREMENT PRIMARY KEY,
+    seat_number VARCHAR(10) NOT NULL,
+    user_id INT NOT NULL,
+    instance_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (instance_id) REFERENCES flight_instances(instance_id) ON DELETE CASCADE
 );
-
-CREATE TABLE Books (
-    user_id INT,
-    flight_no INT,
-    PRIMARY KEY (user_id, flight_no),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (flight_no) REFERENCES Flights(flight_no)
-);
-
-CREATE TABLE Buys (
-    user_id INT,
-    ticket_no INT,
-    PRIMARY KEY (user_id, ticket_no),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (ticket_no) REFERENCES Tickets(ticket_no)
-);
-
-CREATE TABLE IssuedFor (
-    ticket_no INT,
-    flight_no INT,
-    PRIMARY KEY (ticket_no, flight_no),
-    FOREIGN KEY (ticket_no) REFERENCES Tickets(ticket_no),
-    FOREIGN KEY (flight_no) REFERENCES Flights(flight_no)
-);
-
-CREATE TABLE Pays (
-    user_id INT,
-    payment_id INT,
-    PRIMARY KEY (user_id, payment_id),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (payment_id) REFERENCES Payments(payment_id)
-);
-
-
-

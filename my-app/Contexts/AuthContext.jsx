@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [isSigninVisible, setSigninVisible] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [name, setName] = useState('');
+  const [id, setId] = useState('');
 
   const toggleLoggedIn = () => {
     if(loggedIn) setName('');
@@ -30,6 +31,8 @@ export const AuthProvider = ({ children }) => {
     isSigninVisible,
     loggedIn,
     name,
+    id,
+    setId,
     toggleSignupVisibility,
     toggleSigninVisibility,
     toggleLoggedIn,
