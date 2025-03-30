@@ -10,10 +10,13 @@ import { useFlights } from '@/Contexts/FlightContext';
 import { usePassenger } from '@/Contexts/PassengerContext';
 import { useAuth } from "@/Contexts/AuthContext";
 import { useTheme } from '@/Contexts/ThemeContext';
+import { useSeat } from '@/Contexts/SeatContext';
+
 import { useRouter } from 'next/navigation';
 
 const PassengersPage = () => {
   const { selectedFlight } = useFlights();
+  const { setBookedSeats, setMaxSeats, setSelectedSeats } = useSeat();
   const {
     passengers,
     finalPassengerCount,
@@ -35,38 +38,54 @@ const PassengersPage = () => {
     updatePassenger(index, updatedPassenger);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!loggedIn) {
-      isSignupVisible ? null : isSigninVisible ? null : router.push('/Signin');
-      return;
-    }
-
-    // API call to book tickets
-    fetch('/api/book', {
+  const fetchSeats = async () => {
+    const response = await fetch('/api/seats', {
       method: 'POST',
       body: JSON.stringify({
-        airline: selectedFlight.airline,
-        flight_no: selectedFlight.flight_no,
-        passengers: passengers,
-        user_id: id,
+        instance_id: selectedFlight.instance_id,
+        startAirport: selectedFlight.departure_airport,
+        endAirport: selectedFlight.arrival_airport,
+        departureTime: selectedFlight.departure_datetime,
+        arrivalTime: selectedFlight.arrival_datetime,
+        airline: selectedFlight.airline
       }),
       headers: {
         'Content-Type': 'application/json',
       },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          router.push('/thankyou');
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error
+    });
+    const data = await response.json();
+    setBookedSeats(data);
+    return data;
+  }
 
-        );
-      }
-      );
+  const fetchMaxSeats = async () => {
+    const response = await fetch('/api/maxSeat', {
+      method: 'POST',
+      body: JSON.stringify({
+        instance_id: selectedFlight.instance_id,
+        flight_no: selectedFlight.flight_no,
+        airline: selectedFlight.airline,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    setMaxSeats(data.maxSeat);
+    return data;
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await fetchSeats();
+    await fetchMaxSeats();
+    await setSelectedSeats([]);
+    router.push('/SeatSelection');
   };
 
   if (!selectedFlight) {
@@ -121,9 +140,8 @@ const PassengersPage = () => {
 
               <button
                 type="submit"
-                className="px-6 py-2 bg-[#605DEC] text-white font-bold rounded hover:bg-[#4d4aa8]"
-              >
-                Continue to Payment
+                className="px-6 py-2 bg-[#605DEC] text-white font-bold rounded hover:bg-[#4d4aa8]">
+                Continue to Seat Selection
               </button>
             </div>
           </form>

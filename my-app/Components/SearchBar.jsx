@@ -25,6 +25,13 @@ export default function SearchBar() {
 
   const router = useRouter();
 
+  // Ensure passenger count is at least 1 when component mounts
+  useEffect(() => {
+    if (!passengerCount || passengerCount < 1) {
+      setPassengerCount(1);
+    }
+  }, []);
+
   const formatAirport = (loc) => {
     const i = loc.indexOf("(");
     const j = loc.indexOf(")");
@@ -48,7 +55,10 @@ export default function SearchBar() {
         body: JSON.stringify({
           start_airport: formatAirport(fromInput),
           end_airport: formatAirport(toInput),
-          travel_date: date
+          travel_date: date,
+          seats_needed: passengerCount,
+          sortBy: 'departure_datetime',
+          sortOrder: 'asc'
         })
       });
 
@@ -262,10 +272,10 @@ export default function SearchBar() {
           </span>
           <input
             type="date"
-            className={`w-full bg-transparent outline-none text-center mx-auto ${date ? (dark ? "text-white" : "text-gray-600") : "text-gray-400"
-              }`}
+            className={`w-full bg-transparent outline-none text-center mx-auto ${date ? (dark ? "text-white" : "text-gray-600") : "text-gray-400"}`}
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            style={dark ? { colorScheme: 'dark' } : {}}
           />
         </div>
 
@@ -274,13 +284,23 @@ export default function SearchBar() {
           <span className="text-gray-400 mr-2">
             <img className={!dark ? "invert" : ""} src="./icons/person.svg" alt="" />
           </span>
-          <input
-            type="text"
-            placeholder="1 adult"
-            className={`w-full bg-transparent outline-none text-center mx-auto ${dark ? "text-white" : "text-gray-600"}`}
-            value={passengerCount}
-            onChange={(e) => setPassengerCount(e.target.value)}
-          />
+          <div className="flex items-center justify-center w-full">
+            <button 
+              className={`px-2 font-bold text-xl ${dark ? "text-white" : "text-gray-600"}`}
+              onClick={() => setPassengerCount(Math.max(1, Number(passengerCount) - 1))}
+            >
+              -
+            </button>
+            <span className={`mx-3 ${dark ? "text-white" : "text-gray-600"}`}>
+              {Math.max(1, Number(passengerCount))} {Math.max(1, Number(passengerCount)) === 1 ? 'Seat' : 'Seats'}
+            </span>
+            <button 
+              className={`px-2 font-bold text-xl ${dark ? "text-white" : "text-gray-600"}`}
+              onClick={() => setPassengerCount(Math.max(1, Number(passengerCount)) + 1)}
+            >
+              +
+            </button>
+          </div>
         </div>
 
         {/* Search Button */}

@@ -1,17 +1,25 @@
 import React from "react";
 import { useTheme } from "@/Contexts/ThemeContext";
 import { useFlights } from "@/Contexts/FlightContext";
+import { usePassenger } from "@/Contexts/PassengerContext";
+
 import { useRouter } from "next/navigation";
 
 const FlightCard = ({ flight, isSelected }) => {
   const { dark } = useTheme();
   const { selectFlight } = useFlights();
+  const { setPassengers } = usePassenger();
   const router = useRouter();
   // Selected background:
   const selectedBg = dark ? "bg-gray-700" : "bg-gray-300";
 
-  const handleSelectFlight = () => {
-    selectFlight(flight);
+  const handleSelectFlight = async () => {
+    // Make sure we have instance_id in the flight object
+    if (!flight.instance_id && flight.instance_id !== 0) {
+      console.error("Missing instance_id in flight object:", flight);
+    }
+    await selectFlight(flight);
+    await setPassengers([{}]);
     router.push('/Passengers');
   };
 

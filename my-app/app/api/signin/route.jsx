@@ -22,8 +22,6 @@ export async function POST(req) {
 
     connection = await pool.getConnection();
 
-    console.log("Connected to DB successfully");
-
     let query = "SELECT user_id, name, email, phone_no, password FROM users WHERE ";
     let queryParams = [];
 

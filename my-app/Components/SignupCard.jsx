@@ -10,8 +10,7 @@ function SignupCard() {
   const [phoneNo, setPhoneNo] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const { toggleSignupVisibility, setName, toggleLoggedIn, setId } = useAuth();
+  const { toggleSignupVisibility, setName, toggleLoggedIn, setId, authError, setError, clearError } = useAuth();
   const { dark } = useTheme();
 
   const handleSignup = async () => {
@@ -21,7 +20,7 @@ function SignupCard() {
     }
 
     setLoading(true);
-    setError("");
+    clearError();
 
     try {
       const response = await fetch("/api/signup", {
@@ -51,14 +50,14 @@ function SignupCard() {
     <div className={`p-6 rounded-lg shadow-lg w-[400px] relative ${dark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
       <button
         className={`absolute top-2 right-2 hover:${dark ? "text-gray-300" : "text-gray-700"}`}
-        onClick={toggleSignupVisibility}
+        onClick={() => toggleSignupVisibility()}
         disabled={loading}
       >
         ✖
       </button>
       <h2 className="text-xl font-bold mb-4">Sign Up</h2>
 
-      {error && <div className="text-red-500 mb-3">{error}</div>}
+      {authError && <div className="text-red-500 mb-3">{authError}</div>}
 
       <input
         type="text"

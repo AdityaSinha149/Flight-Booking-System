@@ -30,7 +30,10 @@ function Navbar() {
             {loggedIn ? (
               <>
                 {/* Removed welcome message from here */}
-                <button className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline hover:transform hover:scale-110 transition`}>
+                <button 
+                  onClick={() => router.push("/MyTrips")}
+                  className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline hover:transform hover:scale-110 transition`}
+                >
                   My Trips
                 </button>
                 <button
@@ -116,7 +119,13 @@ function Navbar() {
           <div className="absolute top-full left-0 right-0 z-50 bg-inherit px-10 py-2 flex flex-col space-y-2">
             {loggedIn ? (
               <>
-                <button className={`${dark ? "text-gray-300" : "text-gray-700"} text-left hover:underline hover:transform hover:scale-110 transition`}>
+                <button 
+                  onClick={() => {
+                    router.push("/MyTrips");
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`${dark ? "text-gray-300" : "text-gray-700"} text-left hover:underline hover:transform hover:scale-110 transition`}
+                >
                   My Trips
                 </button>
                 <button

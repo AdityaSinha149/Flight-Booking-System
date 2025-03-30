@@ -25,7 +25,7 @@ function Homepage() {
       <Navbar />
 
       <div
-        className={`w-full bg-cover bg-center flex-1 ${dark ? "bg-[#090909] opacity-95" : ""}`}
+        className={`w-full bg-cover bg-center flex-1 ${dark ? "bg-black opacity-90" : ""}`}
         style={{ backgroundImage: "url('/world.png')" }}
       >
       <div className={`h-[38px] bg-transparent`}>

@@ -13,9 +13,12 @@ import { useTheme } from '@/Contexts/ThemeContext';
 const Flights = () => {
   const { isSignupVisible, isSigninVisible } = useAuth();
   const { dark } = useTheme();
-  const { flights, loading } = useFlights();
-  const { error: searchError } = useSearch();
+  const { flights, loading, setFlights } = useFlights();
+  const { error: searchError, fromInput, toInput, date, passengerCount } = useSearch();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [sortBy, setSortBy] = useState('departure_datetime');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [isLoading, setIsLoading] = useState(false);
   const flightRefs = useRef([]);
   const isAnimatingRef = useRef(false);
   const isPressingKeysRef = useRef(false);
@@ -23,6 +26,83 @@ const Flights = () => {
   const isMouseHoveredRef = useRef(false);
   const scrollTimeoutRef = useRef(null);
 
+  // Sorting options configuration
+  const sortOptions = [
+    { value: 'departure_datetime', label: 'Departure Time' },
+    { value: 'price', label: 'Price' },
+    { value: 'duration', label: 'Duration' },
+    { value: 'airline', label: 'Airline' }
+  ];
+
+  const formatAirport = (loc) => {
+    if (!loc) return "";
+    const i = loc.indexOf("(");
+    const j = loc.indexOf(")");
+    return (i !== -1 && j !== -1) ? loc.substring(i + 1, j) : loc;
+  };
+
+  // Function to fetch flights with sorting options
+  const fetchSortedFlights = async (sortingParams) => {
+    console.log("Calling /api/flights with:", {
+      fromInput,
+      toInput,
+      date,
+      passengerCount,
+      ...sortingParams
+    });
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/flights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start_airport: formatAirport(fromInput),
+          end_airport: formatAirport(toInput),
+          travel_date: date,
+          seats_needed: passengerCount,
+          sortBy: sortingParams.sortBy,
+          sortOrder: sortingParams.sortOrder
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setFlights(data);
+      setSelectedIndex(0); // Reset selection when new data arrives
+    } catch (error) {
+      console.error("Failed to fetch sorted flights:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle sort change
+  const handleSortChange = (field) => {
+    let newOrder = sortOrder;
+
+    if (sortBy === field) {
+      // Toggle order if same field is selected
+      newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+      setSortOrder(newOrder);
+    } else {
+      // Set new field and default to ascending
+      setSortBy(field);
+      newOrder = 'asc';
+      setSortOrder(newOrder);
+    }
+    
+    // Fetch sorted flights immediately
+    fetchSortedFlights({ 
+      sortBy: field, 
+      sortOrder: newOrder 
+    });
+  };
+
+  // Existing keyboard navigation effect
   useEffect(() => {
     function handleKeyDown(e) {
       // If a card is hovered, ignore arrow keys
@@ -80,9 +160,32 @@ const Flights = () => {
         <SearchBar />
       </div>
 
+      {/* Sorting Controls */}
+      <div className="flex flex-wrap justify-center gap-2 my-4 px-4">
+        <div className="font-medium text-gray-700 dark:text-gray-300 self-center mr-2">Sort by:</div>
+        {sortOptions.map((option) => (
+          <button
+            key={option.value}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition
+              ${sortBy === option.value 
+                ? 'bg-[#605DEC] text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}`}
+            onClick={() => handleSortChange(option.value)}
+            disabled={isLoading}
+          >
+            {option.label} 
+            {sortBy === option.value && (
+              <span className="ml-1">
+                {sortOrder === 'asc' ? '↑' : '↓'}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Flight Cards Section */}
-      <div className="my-6 sm:px-40 px- py-10 max-h-[500px] overflow-y-auto scroll-smooth">
-        {loading ? (
+      <div className="my-6 sm:px-40 px- py-10 max-h-[500px] overflow-y-auto scroll-smooth scrollbar-hide">
+        {loading || isLoading ? (
           <p className="text-center text-gray-500">Loading flights...</p>
         ) : flights.length > 0 ? (
           flights.map((flight, index) => (
@@ -91,13 +194,13 @@ const Flights = () => {
               ref={(el) => (flightRefs.current[index] = el)}
               className={`${index === selectedIndex ? "transform scale-110" : ""} transition`}
               onMouseEnter={() => {
-                isMouseHoveredRef.current = true; // mark mouse as hovered
+                isMouseHoveredRef.current = true;
                 if (!isPressingKeysRef.current) {
-                  setSelectedIndex(index); // update immediately with no delay
+                  setSelectedIndex(index);
                 }
               }}
               onMouseLeave={() => {
-                isMouseHoveredRef.current = false; // clear mouse hover
+                isMouseHoveredRef.current = false;
                 if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
               }}
             >
@@ -108,7 +211,6 @@ const Flights = () => {
             </div>
           ))
         ) : (
-          // If there's a search error, display nothing here (error is shown in SearchBar)
           !searchError && <p className="text-center text-gray-500">No flights available</p>
         )}
       </div>

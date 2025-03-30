@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/Contexts/ThemeContext'
 import { PassengerProvider } from '@/Contexts/PassengerContext'
 import { AuthProvider } from '@/Contexts/AuthContext'
 import { SearchProvider } from '@/Contexts/SearchContext'
+import { SeatProvider } from '@/Contexts/SeatContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,17 +18,19 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body className={inter.className}>
-                <PassengerProvider>
-                    <AuthProvider>
-                        <SearchProvider>
-                            <ThemeProvider>
-                                <FlightProvider>
-                                    {children}
-                                </FlightProvider>
-                            </ThemeProvider>
-                        </SearchProvider>
-                    </AuthProvider>
-                </PassengerProvider>
+                <SeatProvider>
+                    <PassengerProvider>
+                        <AuthProvider>
+                            <SearchProvider>
+                                <ThemeProvider>
+                                    <FlightProvider>
+                                        {children}
+                                    </FlightProvider>
+                                </ThemeProvider>
+                            </SearchProvider>
+                        </AuthProvider>
+                    </PassengerProvider>
+                </SeatProvider>
             </body>
         </html>
     )
