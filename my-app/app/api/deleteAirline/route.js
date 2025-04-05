@@ -22,29 +22,7 @@ export async function DELETE(request) {
 
     db = await mysql.createConnection(dbConfig);
     
-    // First check if there are any flights for this airline
-    const checkQuery = `SELECT COUNT(*) as count FROM flights WHERE airline_name = ?`;
-    const [checkResult] = await db.execute(checkQuery, [airlineName]);
-    
-    if (checkResult[0].count > 0) {
-      return NextResponse.json(
-        { error: "Cannot delete airline with existing flights. Delete all flights first." },
-        { status: 400 }
-      );
-    }
-
-    // Also check if there are any admins for this airline
-    const checkAdminsQuery = `SELECT COUNT(*) as count FROM admin WHERE airline_name = ?`;
-    const [checkAdminsResult] = await db.execute(checkAdminsQuery, [airlineName]);
-    
-    if (checkAdminsResult[0].count > 0) {
-      return NextResponse.json(
-        { error: "Cannot delete airline with existing admins. Delete all admins first." },
-        { status: 400 }
-      );
-    }
-    
-    // Delete the airline
+    // Delete the airline without checking for admins or flights
     const query = `DELETE FROM airlines WHERE airline_name = ?`;
     const [result] = await db.execute(query, [airlineName]);
 

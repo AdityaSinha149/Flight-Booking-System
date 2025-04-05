@@ -81,3 +81,7 @@ CREATE TABLE payments (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     CHECK (payment_method IN ('Credit Card', 'Debit Card', 'UPI', 'Net Banking', 'Cash'))
 );
+
+ALTER TABLE airports
+DROP COLUMN name,
+MODIFY COLUMN location VARCHAR(255) NOT NULL;
