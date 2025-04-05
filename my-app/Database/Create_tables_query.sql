@@ -70,18 +70,6 @@ CREATE TABLE admin (
 ALTER TABLE admin ADD CONSTRAINT unique_admin_phone UNIQUE (phone_no);
 
 
-CREATE TABLE payments (
-    payment_id    INT AUTO_INCREMENT PRIMARY KEY,
-    ticket_id     INT NOT NULL,
-    user_id       INT NOT NULL,
-    amount_paid   DECIMAL(10,2) NOT NULL,
-    payment_method VARCHAR(50) NOT NULL,
-    payment_time  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    CHECK (payment_method IN ('Credit Card', 'Debit Card', 'UPI', 'Net Banking', 'Cash'))
-);
-
 ALTER TABLE airports
 DROP COLUMN name,
 MODIFY COLUMN location VARCHAR(255) NOT NULL;
