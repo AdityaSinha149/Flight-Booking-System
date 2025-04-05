@@ -22,7 +22,15 @@ export async function POST(req) {
 
     connection = await pool.getConnection();
 
-    let query = "SELECT user_id, name, email, phone_no, password FROM users WHERE ";
+    let query = `SELECT user_id AS userId, 
+                    CONCAT(first_name, ' ', last_name) AS name,
+                    first_name,
+                    last_name,
+                    email,
+                    phone_no,
+                    password 
+             FROM users 
+             WHERE `;
     let queryParams = [];
 
     if (username.includes('@')) {
@@ -49,8 +57,10 @@ export async function POST(req) {
     connection.release();
     return NextResponse.json({
       message: "Sign-in successful!",
-      userId: user[0].user_id,
+      userId: user[0].userId,
       name: user[0].name,
+      firstName: user[0].first_name,
+      lastName: user[0].last_name,
       email: user[0].email,
       phone_no: user[0].phone_no
     }, { status: 200 });

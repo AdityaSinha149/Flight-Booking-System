@@ -5,6 +5,11 @@ const TripCard = ({ trip }) => {
   const { dark } = useTheme();
   const [showDetails, setShowDetails] = useState(false);
 
+  // Ensure trip is defined before accessing its properties
+  if (!trip) {
+    return <div>No trip data available.</div>;
+  }
+
   // Format the date for better display
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);

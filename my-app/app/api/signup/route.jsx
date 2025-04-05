@@ -15,9 +15,9 @@ const pool = mysql.createPool({
 export async function POST(req) {
   let connection;
   try {
-    const { name, email, phone_no, password } = await req.json();
+    const { firstName, lastName, email, phone_no, password } = await req.json();
 
-    if (!name || !email || !phone_no || !password) {
+    if (!firstName || !lastName || !email || !phone_no || !password) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
@@ -41,8 +41,8 @@ export async function POST(req) {
 
     // Insert the new user
     const [result] = await connection.execute(
-      "INSERT INTO users (name, email, phone_no, password) VALUES (?, ?, ?, ?)", 
-      [name, email, phone_no, hashedPassword]
+      "INSERT INTO users (first_name, last_name, email, phone_no, password) VALUES (?, ?, ?, ?, ?)", 
+      [firstName, lastName, email, phone_no, hashedPassword]
     );
 
     await connection.commit();

@@ -9,11 +9,21 @@ const PassengerCard = ({ i, passengers, handleInputChange, dark }) => {
         <h2 className="text-xl font-semibold mb-4">Passenger {i + 1}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block mb-2">Name</label>
+            <label className="block mb-2">First Name</label>
             <input
               type="text"
-              value={passengers[i]?.name || ''}
-              onChange={(e) => handleInputChange(i, 'name', e.target.value)}
+              value={passengers[i]?.firstName || ''}
+              onChange={(e) => handleInputChange(i, 'firstName', e.target.value)}
+              className={`w-full p-2 rounded border ${dark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-2">Last Name</label>
+            <input
+              type="text"
+              value={passengers[i]?.lastName || ''}
+              onChange={(e) => handleInputChange(i, 'lastName', e.target.value)}
               className={`w-full p-2 rounded border ${dark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
               required
             />

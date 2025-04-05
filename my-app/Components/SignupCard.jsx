@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useAuth } from "@/Contexts/AuthContext";
 import { useTheme } from "@/Contexts/ThemeContext";
 
 function SignupCard() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
@@ -13,8 +15,12 @@ function SignupCard() {
   const { toggleSignupVisibility, setName, toggleLoggedIn, setId, authError, setError, clearError } = useAuth();
   const { dark } = useTheme();
 
+  useEffect(() => {
+    setUserName(`${firstName} ${lastName}`);
+  }, [firstName, lastName]);
+
   const handleSignup = async () => {
-    if (!userName || !email || !phoneNo || !password) {
+    if (!firstName || !lastName || !email || !phoneNo || !password) {
       setError("Please fill in all fields.");
       return;
     }
@@ -26,7 +32,7 @@ function SignupCard() {
       const response = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: userName, email, phone_no: phoneNo, password }),
+        body: JSON.stringify({ firstName, lastName, email, phone_no: phoneNo, password }),
       });
 
       const data = await response.json();
@@ -61,10 +67,19 @@ function SignupCard() {
 
       <input
         type="text"
-        placeholder="Username"
+        placeholder="First Name"
         className={`w-full p-2 border rounded mb-3 ${dark ? "border-gray-600 bg-gray-800 text-white" : "border-gray-300 bg-white text-black"}`}
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)}
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+        disabled={loading}
+      />
+
+      <input
+        type="text"
+        placeholder="Last Name"
+        className={`w-full p-2 border rounded mb-3 ${dark ? "border-gray-600 bg-gray-800 text-white" : "border-gray-300 bg-white text-black"}`}
+        value={lastName}
+        onChange={(e) => setLastName(e.target.value)}
         disabled={loading}
       />
 
@@ -99,7 +114,8 @@ function SignupCard() {
         className="w-full bg-[#605DEC] text-white py-2 rounded mb-3 flex justify-center items-center"
         onClick={handleSignup}
         disabled={loading}
-      >
+      ></button>
+      <button>
         {loading ? (
           <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5"></span>
         ) : (

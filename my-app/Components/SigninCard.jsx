@@ -3,13 +3,18 @@ import { useState } from "react";
 
 import { useAuth } from "@/Contexts/AuthContext";
 import { useTheme } from "@/Contexts/ThemeContext";
+import { useRouter } from "next/navigation";
+import { useAdmin } from "@/Contexts/AdminContext";
 
 function SigninCard() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toggleSigninVisibility, setName, toggleLoggedIn, setId, authError, setError, clearError } = useAuth();
   const { dark } = useTheme();
+  const router = useRouter();
+  const { setAdminName, setAdminAirline } = useAdmin();
 
   const handleSignin = async () => {
     if (!username || !password) {
@@ -20,20 +25,27 @@ function SigninCard() {
     setLoading(true);
     clearError(); // Reset error state before starting the request
     try {
-      const response = await fetch("/api/signin", {
+      const url = isAdmin ? "/api/adminSignin" : "/api/signin";
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
-      if (response.ok) {
-        setId(data.userId);
-        setName(data.name);
-        toggleLoggedIn();
-        toggleSigninVisibility();
+      if (!response.ok) {
+        setError(data.error || 'Something went wrong.');
       } else {
-        setError(data.error || "Signin failed.");
+        if (isAdmin) {
+          setAdminName(data.adminName || "");
+          setAdminAirline(data.airline || "");
+          router.push("/Admin");
+        } else {
+          setId(data.userId);
+          setName(data.name);
+          toggleLoggedIn();
+          toggleSigninVisibility();
+        }
       }
     } catch (error) {
       console.error("Signin error:", error);
@@ -85,6 +97,16 @@ function SigninCard() {
           "Sign In"
         )}
       </button>
+
+      <div className="mt-4 text-center">
+        <button
+          onClick={() => setIsAdmin(!isAdmin)}
+          className="underline text-sm"
+          disabled={loading}
+        >
+          {isAdmin ? "Sign in as Regular User" : "Sign in as Admin"}
+        </button>
+      </div>
     </div>
   );
 }

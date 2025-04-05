@@ -4,9 +4,9 @@ import mysql from "mysql2/promise";
 export async function POST(req) {
   let connection;
   try {
-    const { instance_id, passengers, user_id, seats } = await req.json();
+    const { instance_id, passengers, user_id, seats, } = await req.json();
     
-    if (!instance_id || !passengers || !user_id || !seats) {
+    if (!instance_id || !passengers || !user_id || !seats || passengers.length === 0 || seats.length === 0) {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
@@ -20,13 +20,15 @@ export async function POST(req) {
         database: process.env.MYSQLDATABASE,
     });
     
-    const names = passengers.map(p => p.name).join(",");
+    const firstNames = passengers.map(p => p.firstName).join(",");
+    const lastNames = passengers.map(p => p.lastName).join(",");
     const emails = passengers.map(p => p.email).join(",");
     const phones = passengers.map(p => p.phone).join(",");
     const seatNumbers = seats.join(",");
 
-    await connection.query("CALL InsertTickets(?,?,?,?,?,?)", [
-      names,
+    await connection.query("CALL InsertTickets(?,?,?,?,?,?,?)", [
+      firstNames,
+      lastNames,
       emails,
       phones,
       user_id,
@@ -35,7 +37,7 @@ export async function POST(req) {
     ]);
     
     await connection.end();
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: "Booking created." });
 
   } catch (error) {
     console.error("Database Error:", error);

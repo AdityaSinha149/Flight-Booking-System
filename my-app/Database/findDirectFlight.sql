@@ -41,7 +41,7 @@ BEGIN
     WHERE fr.departure_airport_id = ''', start_airport, '''
       AND fr.arrival_airport_id = ''', end_airport, '''
       AND DATE(fi.departure_time) = DATE(''', start_date, ''')
-      AND (f.maxSeat - IFNULL(booked.seat_count, 0)) >= ', seats_needed, '
+      AND (f.max_seat - IFNULL(booked.seat_count, 0)) >= ', seats_needed, '
     ORDER BY ', @sort_field, ' ', @sort_direction);
 
     PREPARE stmt FROM @sql;

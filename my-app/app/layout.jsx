@@ -6,6 +6,8 @@ import { PassengerProvider } from '@/Contexts/PassengerContext'
 import { AuthProvider } from '@/Contexts/AuthContext'
 import { SearchProvider } from '@/Contexts/SearchContext'
 import { SeatProvider } from '@/Contexts/SeatContext'
+import { AdminProvider } from "@/Contexts/AdminContext";
+import { SuperAdminProvider } from '@/Contexts/SuperAdminContext';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,20 +19,30 @@ export const metadata = {
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
+            <head>
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600&display=swap"
+                    rel="stylesheet"
+                />
+            </head>
             <body className={inter.className}>
-                <SeatProvider>
-                    <PassengerProvider>
-                        <AuthProvider>
-                            <SearchProvider>
-                                <ThemeProvider>
-                                    <FlightProvider>
-                                        {children}
-                                    </FlightProvider>
-                                </ThemeProvider>
-                            </SearchProvider>
-                        </AuthProvider>
-                    </PassengerProvider>
-                </SeatProvider>
+                <AdminProvider>
+                    <SeatProvider>
+                        <PassengerProvider>
+                            <AuthProvider>
+                                <SearchProvider>
+                                    <ThemeProvider>
+                                        <FlightProvider>
+                                            <SuperAdminProvider>
+                                                {children}
+                                            </SuperAdminProvider>
+                                        </FlightProvider>
+                                    </ThemeProvider>
+                                </SearchProvider>
+                            </AuthProvider>
+                        </PassengerProvider>
+                    </SeatProvider>
+                </AdminProvider>
             </body>
         </html>
     )

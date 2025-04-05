@@ -14,7 +14,6 @@ CREATE TABLE log (
     booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
 DELIMITER //
 
 CREATE TRIGGER after_ticket_insert
@@ -33,7 +32,8 @@ BEGIN
     DECLARE v_price DECIMAL(10,2);
 
     -- Get user details
-    SELECT name, email, phone_no INTO v_user_name, v_email, v_phone_no
+    SELECT name, email, phone_no 
+    INTO v_user_name, v_email, v_phone_no
     FROM users WHERE user_id = NEW.user_id;
 
     -- Get flight details

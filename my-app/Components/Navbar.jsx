@@ -5,16 +5,36 @@ import { useRouter } from "next/navigation";
 
 import { useAuth } from '@/Contexts/AuthContext';
 import { useTheme } from '@/Contexts/ThemeContext';
+import { useAdmin } from '@/Contexts/AdminContext';
+import { useSuperAdmin } from '@/Contexts/SuperAdminContext'; // Add SuperAdminContext import
 
-function Navbar() {
+function Navbar({ isAdmin = false, adminName = "" }) {
   const { toggleSignupVisibility, toggleSigninVisibility, loggedIn, toggleLoggedIn, name } = useAuth();
   const { dark, toggleDarkMode } = useTheme();
+  const { setAdminName, setAdminAirline } = useAdmin();
+  const { superAdminLoggedIn, setSuperAdminLoggedIn } = useSuperAdmin(); // Get SuperAdmin context
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogoClick = () => {
     router.push("/");
   }
+
+  const handleSignOut = () => {
+    if (isAdmin) {
+      setAdminName("");
+      setAdminAirline("");
+      router.push("/");
+    } else if (superAdminLoggedIn) {
+      setSuperAdminLoggedIn(false);
+      router.push("/");
+    } else {
+      toggleLoggedIn();
+    }
+  };
+
+  // Determine which type of user is logged in
+  const displayName = isAdmin ? adminName : (superAdminLoggedIn ? "Super Admin" : name);
 
   return (
     <>
@@ -27,21 +47,40 @@ function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            {loggedIn ? (
+            {loggedIn || isAdmin || superAdminLoggedIn ? (
               <>
-                {/* Removed welcome message from here */}
-                <button 
-                  onClick={() => router.push("/MyTrips")}
-                  className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline hover:transform hover:scale-110 transition`}
-                >
-                  My Trips
-                </button>
+                {/* Navigation button - changes based on user type */}
+                {isAdmin ? (
+                  <button 
+                    onClick={() => router.push("/OurFlights")}
+                    className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline hover:transform hover:scale-110 transition`}
+                  >
+                    Our Flights
+                  </button>
+                ) : superAdminLoggedIn ? (
+                  <button 
+                    onClick={() => router.push("/Unused")}
+                    className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline hover:transform hover:scale-110 transition`}
+                  >
+                    Unused
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => router.push("/MyTrips")}
+                    className={`${dark ? "text-gray-300" : "text-gray-700"} hover:underline hover:transform hover:scale-110 transition`}
+                  >
+                    My Trips
+                  </button>
+                )}
+                
+                {/* Sign out button - now with navigation logic for admin */}
                 <button
                   className="w-20 h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md hover:bg-[#4d4aa8] hover:transform hover:scale-110 transition"
-                  onClick={toggleLoggedIn}
+                  onClick={handleSignOut}
                 >
-                  Sign out
+                  {superAdminLoggedIn ? "Home" : "Sign out"}
                 </button>
+                
                 <button
                   onClick={toggleDarkMode}
                   className={`p-2 rounded-full transition ${dark ? "bg-gray-700" : "bg-gray-200"}`}
@@ -107,32 +146,57 @@ function Navbar() {
           </div>
         </div>
 
-        {/* New centered welcome message for desktop */}
-        {loggedIn && (
+        {/* New centered welcome message for desktop - works for both admin and regular users */}
+        {(loggedIn || isAdmin || superAdminLoggedIn) && (
           <h1 className={`hidden md:block absolute left-1/2 transform -translate-x-1/2 text-4xl font-newsreader font-bold ${dark ? "text-gray-400" : "text-gray-700"}`}>
-            Welcome {name}
+            Welcome {displayName}
           </h1>
         )}
 
         {/* Mobile Dropdown Menu (without theme toggle) */}
         {mobileMenuOpen && (
           <div className="absolute top-full left-0 right-0 z-50 bg-inherit px-10 py-2 flex flex-col space-y-2">
-            {loggedIn ? (
+            {loggedIn || isAdmin || superAdminLoggedIn ? (
               <>
-                <button 
-                  onClick={() => {
-                    router.push("/MyTrips");
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`${dark ? "text-gray-300" : "text-gray-700"} text-left hover:underline hover:transform hover:scale-110 transition`}
-                >
-                  My Trips
-                </button>
+                {/* Update mobile menu button for admin users */}
+                {isAdmin ? (
+                  <button 
+                    onClick={() => {
+                      router.push("/Admin");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`${dark ? "text-gray-300" : "text-gray-700"} text-left hover:underline hover:transform hover:scale-110 transition`}
+                  >
+                    Our Flights
+                  </button>
+                ) : superAdminLoggedIn ? (
+                  <button 
+                    onClick={() => {
+                      router.push("/Unused");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`${dark ? "text-gray-300" : "text-gray-700"} text-left hover:underline hover:transform hover:scale-110 transition`}
+                  >
+                    Unused
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      router.push("/MyTrips");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`${dark ? "text-gray-300" : "text-gray-700"} text-left hover:underline hover:transform hover:scale-110 transition`}
+                  >
+                    My Trips
+                  </button>
+                )}
+                
+                {/* Sign out button in mobile - updated with navigation logic */}
                 <button
                   className="w-full h-10 bg-[#605DEC] text-white flex justify-center items-center rounded-md hover:bg-[#4d4aa8] hover:transform hover:scale-110 transition"
-                  onClick={toggleLoggedIn}
+                  onClick={handleSignOut}
                 >
-                  Sign out
+                  {superAdminLoggedIn ? "Home" : "Sign out"}
                 </button>
               </>
             ) : (
@@ -155,11 +219,11 @@ function Navbar() {
         )}
       </nav>
 
-      {/* Mobile Welcome message styling updated */}
-      {loggedIn && (
+      {/* Mobile Welcome message styling updated - works for both admin and regular users */}
+      {(loggedIn || isAdmin || superAdminLoggedIn) && (
         <div className={`mt-2 px-10 md:hidden text-center ${dark ? "bg-gray-900" : "bg-gray-300"}`}>
           <h1 className={`text-4xl font-newsreader font-bold ${dark ? "text-gray-400" : "text-gray-700"}`}>
-            Welcome {name}
+            Welcome {displayName}
           </h1>
         </div>
       )}

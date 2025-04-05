@@ -74,7 +74,7 @@ export async function POST(request) {
         WHERE fr.departure_airport_id = ?
           AND fr.arrival_airport_id = ?
           AND DATE(fi.departure_time) = DATE(?)
-          AND (f.maxSeat - IFNULL(booked.seat_count, 0)) >= ?
+          AND (f.max_seat - IFNULL(booked.seat_count, 0)) >= ?
         ORDER BY ${orderBy} ${actualSortOrder === 'desc' ? 'DESC' : 'ASC'};
       `;
       

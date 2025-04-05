@@ -1,3 +1,4 @@
+-- Insert airline companies
 INSERT INTO airlines VALUES 
 ('Air India'), 
 ('AirAsia'), 
@@ -6,7 +7,7 @@ INSERT INTO airlines VALUES
 ('Vistara'),
 ('GoAir');
 
-
+-- Insert flights
 INSERT INTO flights (flight_no, airline_name) VALUES
 (101, 'Air India'),
 (102, 'IndiGo'),
@@ -15,14 +16,16 @@ INSERT INTO flights (flight_no, airline_name) VALUES
 (105, 'GoAir'),
 (106, 'AirAsia');
 
+-- Insert airports (with correct 3-letter IATA codes as location)
 INSERT INTO airports (airport_id, name, location) VALUES
-('DEL', 'Indira Gandhi International Airport', 'New Delhi'),
-('BOM', 'Chhatrapati Shivaji Maharaj International Airport', 'Mumbai'),
-('BLR', 'Kempegowda International Airport', 'Bengaluru'),
-('MAA', 'Chennai International Airport', 'Chennai'),
-('HYD', 'Rajiv Gandhi International Airport', 'Hyderabad'),
-('CCU', 'Netaji Subhas Chandra Bose International Airport', 'Kolkata');
+('DEL', 'Indira Gandhi International Airport', 'DEL'),
+('BOM', 'Chhatrapati Shivaji Maharaj International Airport', 'BOM'),
+('BLR', 'Kempegowda International Airport', 'BLR'),
+('MAA', 'Chennai International Airport', 'MAA'),
+('HYD', 'Rajiv Gandhi International Airport', 'HYD'),
+('CCU', 'Netaji Subhas Chandra Bose International Airport', 'CCU');
 
+-- Insert flight routes
 INSERT INTO flight_routes (departure_airport_id, arrival_airport_id) VALUES
 ('DEL', 'BOM'), -- Delhi to Mumbai
 ('DEL', 'BLR'), -- Delhi to Bangalore
@@ -32,6 +35,7 @@ INSERT INTO flight_routes (departure_airport_id, arrival_airport_id) VALUES
 ('HYD', 'DEL'), -- Hyderabad to Delhi
 ('CCU', 'BOM'); -- Kolkata to Mumbai
 
+-- Insert flight instances (updated for consistency)
 INSERT INTO flight_instances (flight_no, airline_name, route_id, departure_time, arrival_time, price) VALUES
 (101, 'Air India', 1, '2025-04-01 06:00:00', '2025-04-01 08:15:00', 5500.00),
 (102, 'IndiGo', 2, '2025-04-01 09:30:00', '2025-04-01 12:00:00', 4700.00),

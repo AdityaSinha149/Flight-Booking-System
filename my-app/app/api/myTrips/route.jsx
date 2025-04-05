@@ -60,7 +60,7 @@ export async function POST(request) {
         fi.arrival_time AS arrival_datetime,
         DATE_FORMAT(fi.arrival_time, '%Y-%m-%d %h:%i %p') AS arrival,
         t.seat_number,
-        t.name AS passenger_name,
+        CONCAT(t.first_name, ' ', t.last_name) AS passenger_name,
         t.email AS passenger_email,
         t.phone_no AS passenger_phone,
         t.ticket_id,
@@ -74,7 +74,7 @@ export async function POST(request) {
       WHERE 
         t.user_id = ?
       ORDER BY 
-        fi.departure_time DESC
+      t.booking_time DESC
     `;
 
     // Try executing the query
@@ -96,11 +96,15 @@ export async function POST(request) {
       return NextResponse.json([]);
     }
     
-    // Group the trips by instance_id (group passengers on same flight)
+    // Group the trips by instance_id AND booking_date (separate bookings made on different dates)
     const trips = {};
     rows.forEach(row => {
-      if (!trips[row.instance_id]) {
-        trips[row.instance_id] = {
+      // Create a composite key using both instance_id and booking date (YYYY-MM-DD)
+      const bookingDate = new Date(row.booking_date).toISOString().split('T')[0];
+      const tripKey = `${row.instance_id}_${bookingDate}`;
+      
+      if (!trips[tripKey]) {
+        trips[tripKey] = {
           instance_id: row.instance_id,
           flight_no: row.flight_no,
           airline: row.airline,
@@ -117,7 +121,7 @@ export async function POST(request) {
         };
       }
       
-      trips[row.instance_id].passengers.push({
+      trips[tripKey].passengers.push({
         ticket_id: row.ticket_id,
         seat_number: row.seat_number,
         name: row.passenger_name,

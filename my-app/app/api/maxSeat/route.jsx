@@ -23,7 +23,7 @@ export async function POST(request) {
         db = await mysql.createConnection(dbConfig);
         
         const [rows] = await db.execute(`
-            SELECT f.maxSeat
+            SELECT f.max_seat
             FROM flight_instances fi
             JOIN flights f ON fi.flight_no = f.flight_no AND fi.airline_name = f.airline_name
             WHERE fi.instance_id = ?
@@ -31,7 +31,7 @@ export async function POST(request) {
         
         let maxSeat = 0;
         if (rows && rows.length > 0) {
-            maxSeat = rows[0].maxSeat;
+            maxSeat = rows[0].max_seat
         }
 
         await db.end();
