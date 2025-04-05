@@ -73,3 +73,8 @@ ALTER TABLE admin ADD CONSTRAINT unique_admin_phone UNIQUE (phone_no);
 ALTER TABLE airports
 DROP COLUMN name,
 MODIFY COLUMN location VARCHAR(255) NOT NULL;
+
+
+ALTER TABLE airports
+ADD CONSTRAINT airport_id_chk
+CHECK (regexp_like(airport_id, '^[A-Z]{3}$'));
