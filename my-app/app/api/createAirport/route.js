@@ -11,7 +11,7 @@ export async function POST(request) {
       database: process.env.MYSQLDATABASE,
     });
     
-    const { airportId, name, location } = await request.json();
+    const { airportId, location } = await request.json();
     
     // Check if airport already exists
     const [existing] = await connection.execute(
@@ -26,10 +26,10 @@ export async function POST(request) {
       }, { status: 409 });
     }
     
-    // Insert the new airport
+    // Insert the new airport - updated for new table structure
     await connection.execute(
-      "INSERT INTO airports (airport_id, name, location) VALUES (?, ?, ?)",
-      [airportId, name, location]
+      "INSERT INTO airports (airport_id, location) VALUES (?, ?)",
+      [airportId, location]
     );
     
     return NextResponse.json({ success: true });

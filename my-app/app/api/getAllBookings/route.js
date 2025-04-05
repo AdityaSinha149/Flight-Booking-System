@@ -44,7 +44,7 @@ export async function GET(request) {
       params.push(airline);
     }
 
-    query += " ORDER BY t.booking_time DESC";
+    query += " ORDER BY f.airline_name, t.seat_number";
 
     const [bookings] = await db.execute(query, params);
 

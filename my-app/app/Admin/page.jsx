@@ -22,7 +22,6 @@ export default function AdminPage() {
   const [airports, setAirports] = useState([]);
   const [addingNewLocation, setAddingNewLocation] = useState(false);
   const [newAirportId, setNewAirportId] = useState("");
-  const [newAirportName, setNewAirportName] = useState("");
   const [newAirportLocation, setNewAirportLocation] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -195,16 +194,17 @@ export default function AdminPage() {
     setTimeout(() => setSuccess(""), 3000);
   };
 
-  const handleCreateAirport = async () => {
+  const handleAddAirport = async (e) => {
+    e.preventDefault();
     setError("");
-
-    if (!newAirportId || !newAirportName || !newAirportLocation) {
-      setError("All fields are required to add an airport.");
-      return;
-    }
+    setSuccess("");
     
     try {
-      // Validate airport ID format (typically 3 uppercase letters)
+      if (!newAirportId || !newAirportLocation) {
+        setError("Please fill in all required fields");
+        return;
+      }
+      
       if (!/^[A-Z]{3}$/.test(newAirportId)) {
         setError("Airport code must be 3 uppercase letters (e.g. DEL)");
         return;
@@ -215,7 +215,6 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           airportId: newAirportId,
-          name: newAirportName,
           location: newAirportLocation,
         }),
       });
@@ -226,10 +225,9 @@ export default function AdminPage() {
         throw new Error(data.error || "Failed to add airport. It might already exist.");
       }
       
-      setSuccess(`Airport ${newAirportId} - ${newAirportName} added successfully!`);
+      setSuccess(`Airport ${newAirportId} - ${newAirportLocation} added successfully!`);
       setAddingNewLocation(false);
       setNewAirportId("");
-      setNewAirportName("");
       setNewAirportLocation("");
       // Re-fetch airports
       const airportsRes = await fetch("/api/getAirports");
@@ -267,7 +265,7 @@ export default function AdminPage() {
                 .filter((airport) => airport.airport_id !== arrivalAirport)
                 .map((a) => (
                   <option key={a.airport_id} value={a.airport_id}>
-                    {a.airport_id} - {a.name}
+                    {a.airport_id} - {a.location}
                   </option>
                 ))}
             </select>
@@ -281,7 +279,7 @@ export default function AdminPage() {
                 .filter((airport) => airport.airport_id !== departureAirport)
                 .map((a) => (
                   <option key={a.airport_id} value={a.airport_id}>
-                    {a.airport_id} - {a.name}
+                    {a.airport_id} - {a.location}
                   </option>
                 ))}
             </select>
@@ -295,19 +293,12 @@ export default function AdminPage() {
             </button>
           )}
           {addingNewLocation && (
-            <div className="grid grid-cols-3 gap-2 mb-2 mt-2">
+            <div className="grid grid-cols-2 gap-2 mb-2 mt-2">
               <input
                 type="text"
                 placeholder="Code (e.g. DEL)"
                 value={newAirportId}
                 onChange={(e) => setNewAirportId(e.target.value)}
-                className="border p-2 rounded text-black"
-              />
-              <input
-                type="text"
-                placeholder="Name"
-                value={newAirportName}
-                onChange={(e) => setNewAirportName(e.target.value)}
                 className="border p-2 rounded text-black"
               />
               <input
@@ -318,8 +309,8 @@ export default function AdminPage() {
                 className="border p-2 rounded text-black"
               />
               <button
-                onClick={handleCreateAirport}
-                className="bg-[#605DEC] text-white px-4 py-2 rounded-md col-span-3"
+                onClick={handleAddAirport}
+                className="bg-[#605DEC] text-white px-4 py-2 rounded-md col-span-2"
               >
                 Submit airport
               </button>

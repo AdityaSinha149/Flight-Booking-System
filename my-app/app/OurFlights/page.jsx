@@ -254,7 +254,7 @@ export default function OurFlightsPage() {
                     <th className="px-6 py-3 text-left font-medium">Airline</th>
                     <th className="px-6 py-3 text-left font-medium">Capacity</th>
                     <th className="px-6 py-3 text-left font-medium">Status</th>
-                    <th className="px-6 py-3 text-left font-medium">Actions</th>
+                    <th className="px-6 py-3 text-right font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-300">
@@ -266,7 +266,7 @@ export default function OurFlightsPage() {
                         <td className="px-6 py-4">{flight.airline_name}</td>
                         <td className="px-6 py-4">{flight.max_seat} seats</td>
                         <td className="px-6 py-4">{isUsed ? "Used" : "Unused"}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-right">
                           <button
                             onClick={() => handleDeleteFlight(flight.flight_no)}
                             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
@@ -315,7 +315,7 @@ export default function OurFlightsPage() {
                     <th className="px-6 py-3 text-left font-medium">Price</th>
                     <th className="px-6 py-3 text-left font-medium">Occupancy</th>
                     <th className="px-6 py-3 text-left font-medium">Status</th>
-                    <th className="px-6 py-3 text-left font-medium">Actions</th>
+                    <th className="px-6 py-3 text-right font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-300">
@@ -346,7 +346,7 @@ export default function OurFlightsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4">{inst.status}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-right">
                           <button
                             onClick={() => handleDelete(inst.instance_id)}
                             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"

@@ -46,13 +46,13 @@ const SeatSelection = () => {
     setSelectedSeats(prev => [...prev, seatId]); // Add the seat
   };
 
-  // Modify handlePayment to save payment details after successful Razorpay payment
+  // Modify handlePayment to improve error handling
   const handlePayment = async () => {
     try {
       // First, validate inputs before initiating payment
       if (!loggedIn) {
         toggleSigninVisibility();
-        setError("Please sign in to book your flight.");
+        setErrorMessage("Please sign in to book your flight.");
         return;
       }
 
@@ -61,21 +61,76 @@ const SeatSelection = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
+
+      if (!selectedFlight || !selectedFlight.price) {
+        setErrorMessage("Invalid flight details. Please try again.");
+        return;
+      }
       
       // Clear any previous errors
       setErrorMessage('');
       
-      // Create Razorpay order
+      // Debug selectedFlight and price to ensure they exist
+      console.log("Selected flight details:", selectedFlight);
+      
+      // Ensure price is correctly extracted as a number
+      const price = typeof selectedFlight.price === 'string' 
+        ? parseFloat(selectedFlight.price.replace(/,/g, '')) // Remove commas if present
+        : parseFloat(selectedFlight.price);
+        
+      if (isNaN(price)) {
+        setErrorMessage("Invalid price format. Please try again.");
+        return;
+      }
+      
+      // Calculate the total amount for all passengers (in rupees)
+      const totalPrice = price * selectedSeats.length;
+      
+      // Convert to paise (multiply by 100) for Razorpay
+      // Razorpay expects amount in paise (1 rupee = 100 paise)
+      const totalAmountInPaise = Math.round(totalPrice * 100);
+
+      console.log("Payment details:", { 
+        originalPrice: price,
+        seats: selectedSeats.length,
+        totalPrice: totalPrice,
+        totalAmountInPaise: totalAmountInPaise
+      });
+      
+      // Create Razorpay order with explicit amount validation
+      if (totalAmountInPaise <= 0) {
+        setErrorMessage("Invalid payment amount calculated. Please try again.");
+        return;
+      }
+      
       const res = await fetch("/api/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: selectedFlight.price * selectedSeats.length * 100, // Convert to paise
+          amount: totalAmountInPaise,
         })
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create payment");
+      
+      // Log the complete response for debugging
+      console.log("Payment API response:", {
+        status: res.status,
+        ok: res.ok,
+        data: data
+      });
+      
+      // Properly handle API errors
+      if (!res.ok) {
+        const errorMessage = data.error || "Failed to create payment order";
+        console.error("Payment API error:", { status: res.status, error: errorMessage });
+        throw new Error(errorMessage);
+      }
+
+      if (!data.id) {
+        console.error("Payment API: Missing order ID in response", data);
+        throw new Error("Invalid payment response");
+      }
 
       // Initialize payment
       const paymentData = {
@@ -86,21 +141,53 @@ const SeatSelection = () => {
         name: "Flight Booking",
         description: `${selectedFlight.airline} - ${selectedFlight.flight_no}`,
         handler: async function (response) {
-          // On successful payment, proceed with booking and saving payment
-          const paymentId = response.razorpay_payment_id;
-          await bookFlightTickets(paymentId);
+          try {
+            console.log("Payment successful:", response);
+            const paymentId = response.razorpay_payment_id;
+            
+            if (!paymentId) {
+              setErrorMessage("Payment failed - no payment ID received");
+              return;
+            }
+            
+            // Only book flight tickets after successful payment
+            await bookFlightTickets(paymentId);
+          } catch (error) {
+            console.error("Payment handler error:", error);
+            setErrorMessage("Error processing payment completion. Please contact support.");
+          }
+        },
+        // Add modal closing handler to detect payment cancellations or failures
+        modal: {
+          ondismiss: function() {
+            console.log("Payment modal dismissed");
+            setErrorMessage("Payment was cancelled or failed. No booking has been made.");
+          }
+        },
+        prefill: {
+          name: passengers[0]?.firstName + ' ' + passengers[0]?.lastName,
+          email: passengers[0]?.email,
+          contact: passengers[0]?.phone
+        },
+        theme: {
+          color: "#605DEC",
         }
       };
+
+      console.log("Initializing Razorpay with config:", {
+        ...paymentData,
+        key: paymentData.key ? "present" : "missing"
+      });
 
       const payment = new window.Razorpay(paymentData);   
       payment.open();
     } catch (error) {
-      console.error("Payment error:", error);
-      setErrorMessage("Payment initialization failed. Please try again.");
+      console.error("Payment initialization error:", error);
+      setErrorMessage(error.message || "Payment initialization failed. Please try again.");
     }
   };
 
-  // Update bookFlightTickets to save payment details
+  // Update bookFlightTickets to correctly redirect to thank you page
   const bookFlightTickets = async (paymentId) => {
     try {
       // First, book the flight
@@ -146,7 +233,8 @@ const SeatSelection = () => {
         }
       }
       
-      // Redirect to thank you page
+      // Always redirect to thank you page after successful booking
+      console.log("Redirecting to thank you page...");
       router.push('/thankyou');
       
     } catch (error) {

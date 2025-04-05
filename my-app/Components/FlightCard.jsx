@@ -117,7 +117,7 @@ const FlightCard = ({ flight, isSelected }) => {
             className={`text-lg font-bold ${dark ? "text-gray-200" : "text-gray-800"
               }`}
           >
-            ₹{flight.price.toLocaleString()}
+            ₹{isNaN(Number(flight.price)) ? flight.price : Number(flight.price).toLocaleString()}
           </p>
           <button
             className={`px-4 py-2 mt-2 text-md rounded bg-[#605DEC] font-bold hover:bg-[#4d4aa8] hover:transform hover:scale-125 transition`}

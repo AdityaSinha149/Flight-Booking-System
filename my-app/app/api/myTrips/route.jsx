@@ -45,8 +45,8 @@ export async function POST(request) {
       );
     }
     
-    // Updated query to handle potential missing join issues
-    const query = `
+    // First query: Get active bookings
+    const activeQuery = `
       SELECT 
         t.ticket_id,
         t.instance_id,
@@ -66,7 +66,8 @@ export async function POST(request) {
         t.ticket_id,
         fi.price,
         t.user_id,
-        t.booking_time AS booking_date
+        t.booking_time AS booking_date,
+        'ACTIVE' AS status
       FROM 
         tickets t
         LEFT JOIN flight_instances fi ON t.instance_id = fi.instance_id
@@ -74,14 +75,57 @@ export async function POST(request) {
       WHERE 
         t.user_id = ?
       ORDER BY 
-      t.booking_time DESC
+        t.booking_time DESC
     `;
 
-    // Try executing the query
-    let rows;
+    // Second query: Get canceled/deleted bookings with improved routes handling using WITH clause
+    const canceledQuery = `
+      WITH all_routes AS (
+        SELECT route_id, departure_airport_id, arrival_airport_id FROM flight_routes
+        UNION ALL
+        SELECT route_id, departure_airport_id, arrival_airport_id FROM deleted_flight_routes
+      )
+      SELECT 
+        dt.ticket_id,
+        dt.instance_id,
+        dfi.flight_no,
+        dfi.airline_name AS airline,
+        r.departure_airport_id AS departure_airport,
+        r.arrival_airport_id AS arrival_airport,
+        TIME_FORMAT(TIMEDIFF(dfi.arrival_time, dfi.departure_time), '%H:%i:%s') AS duration,
+        dfi.departure_time AS departure_datetime,
+        DATE_FORMAT(dfi.departure_time, '%Y-%m-%d %h:%i %p') AS departure,
+        dfi.arrival_time AS arrival_datetime,
+        DATE_FORMAT(dfi.arrival_time, '%Y-%m-%d %h:%i %p') AS arrival,
+        dt.seat_number,
+        dt.name AS passenger_name,
+        dt.email AS passenger_email,
+        dt.phone_no AS passenger_phone,
+        dt.ticket_id,
+        dfi.price,
+        dt.user_id,
+        dt.booking_time AS booking_date,
+        CASE
+          WHEN dfi.departure_time > NOW() THEN 'CANCELED'
+          ELSE 'COMPLETED'
+        END AS status,
+        dt.deleted_at
+      FROM 
+        deleted_tickets dt
+        JOIN deleted_flight_instances dfi ON dt.instance_id = dfi.instance_id
+        LEFT JOIN all_routes r ON dfi.route_id = r.route_id
+      WHERE 
+        dt.user_id = ?
+      ORDER BY 
+        dt.booking_time DESC
+    `;
+
+    // Execute both queries
+    let activeRows, canceledRows;
     try {
-      [rows] = await db.execute(query, [user_id]);
-      console.log(`Found ${rows.length} ticket records`);
+      [activeRows] = await db.execute(activeQuery, [user_id]);
+      [canceledRows] = await db.execute(canceledQuery, [user_id]);
+      console.log(`Found ${activeRows.length} active ticket records and ${canceledRows.length} canceled ticket records`);
     } catch (queryError) {
       console.error("Query execution error:", queryError);
       return NextResponse.json(
@@ -90,18 +134,21 @@ export async function POST(request) {
       );
     }
     
+    // Combine both result sets
+    const allRows = [...activeRows, ...canceledRows];
+    
     // Handle case where no trips are found
-    if (rows.length === 0) {
+    if (allRows.length === 0) {
       await db.end();
       return NextResponse.json([]);
     }
     
     // Group the trips by instance_id AND booking_date (separate bookings made on different dates)
     const trips = {};
-    rows.forEach(row => {
+    allRows.forEach(row => {
       // Create a composite key using both instance_id and booking date (YYYY-MM-DD)
       const bookingDate = new Date(row.booking_date).toISOString().split('T')[0];
-      const tripKey = `${row.instance_id}_${bookingDate}`;
+      const tripKey = `${row.instance_id}_${bookingDate}_${row.status}`;
       
       if (!trips[tripKey]) {
         trips[tripKey] = {
@@ -117,6 +164,8 @@ export async function POST(request) {
           arrival: row.arrival,
           booking_date: row.booking_date,
           price: row.price,
+          status: row.status,
+          deleted_at: row.deleted_at || null,
           passengers: []
         };
       }

@@ -29,73 +29,124 @@ const TripCard = ({ trip }) => {
     });
   };
 
+  const getStatusInfo = (trip) => {
+    const departure = new Date(trip.departure_datetime);
+    const arrival = new Date(trip.arrival_datetime);
+    const now = new Date();
+    
+    if (trip.status === 'CANCELED') {
+      return {
+        text: "Flight Canceled - Refund Issued",
+        color: "text-orange-600",
+        bgColor: dark ? "bg-orange-900/30" : "bg-orange-100"
+      };
+    } else if (now > arrival) {
+      return {
+        text: "Completed",
+        color: "text-gray-500",
+        bgColor: dark ? "bg-gray-800" : "bg-gray-100"
+      };
+    } else if (now > departure) {
+      return {
+        text: "In Progress",
+        color: "text-blue-500",
+        bgColor: dark ? "bg-blue-900/30" : "bg-blue-100"
+      };
+    } else {
+      return {
+        text: "Upcoming",
+        color: "text-green-500",
+        bgColor: dark ? "bg-green-900/30" : "bg-green-100"
+      };
+    }
+  };
+  
+  const statusInfo = getStatusInfo(trip);
+  
   return (
     <div 
       className={`rounded-lg shadow-md mb-6 overflow-hidden
         ${dark ? "bg-gray-800 text-white" : "bg-white text-gray-800"}
         border ${dark ? "border-gray-700" : "border-gray-200"}`}
     >
+      {/* Status Banner */}
+      <div className={`${statusInfo.bgColor} ${statusInfo.color} py-2 px-4 flex justify-between items-center`}>
+        <span className="font-medium">{statusInfo.text}</span>
+        
+        {trip.status === 'CANCELED' && trip.deleted_at && (
+          <div className="text-sm">
+            Canceled on {new Date(trip.deleted_at).toLocaleDateString()}
+          </div>
+        )}
+      </div>
+
       {/* Trip summary section */}
       <div className="p-4">
-        <div className="flex flex-wrap justify-between items-center mb-2">
-          <h3 className="text-xl font-bold text-[#605DEC]">{trip.airline}</h3>
-          <span className={`text-sm ${dark ? "text-gray-300" : "text-gray-600"}`}>
-            Booked on {formatDate(trip.booking_date)}
-          </span>
+        <div className="flex flex-wrap justify-between items-center mb-4">
+          <div>
+            <h3 className="text-xl font-bold text-[#605DEC]">
+              {trip.airline} #{trip.flight_no}
+            </h3>
+            <p className="text-sm mt-1">
+              Booked on {formatDate(trip.booking_date)}
+            </p>
+          </div>
+          <div className="text-lg font-bold">
+            ₹{(trip.price * trip.passengers.length).toLocaleString()}
+          </div>
         </div>
 
-        {/* Flight info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center my-4">
-          {/* Departure */}
+        {/* Flight Details - styled like FlightCard */}
+        <div className="flex flex-col sm:flex-row items-center justify-between my-4 px-2">
+          {/* Departure Info */}
           <div className="text-center">
-            <p className="text-lg font-semibold">{formatTime(trip.departure_datetime)}</p>
-            <p className="text-xl">{trip.departure_airport}</p>
+            <p className={`text-base font-medium ${dark ? "text-gray-300" : "text-gray-700"}`}>
+              {formatTime(trip.departure_datetime)}
+            </p>
+            <p className={`text-xl ${dark ? "text-gray-400" : "text-gray-500"}`}>
+              {trip.departure_airport}
+            </p>
             <p className="text-sm">{formatDate(trip.departure_datetime)}</p>
           </div>
 
-          {/* Flight path */}
-          <div className="transform scale-110 flex flex-row items-center gap-[1px] justify-center">
-            <div className="flex flex-col items-center -translate-y-[2px]">
-              <p className="text-sm">{trip.duration}</p>
-              <div className="flex items-center">
-                <img src="/flights/line.png" alt="line" className="w-8 h-[2px]" />
-                <img src="/flights/line.png" alt="line" className="w-8 h-[2px]" />
-                <img src="/flights/line.png" alt="line" className="w-8 h-[2px]" />
-              </div>
-              <p className="text-xs mt-1">Flight #{trip.flight_no}</p>
-            </div>
-            <img
-              src="/flights/flight-icon.png"
-              alt="Flight icon"
-              className="w-8 h-auto"
-            />
+          {/* Flight Path - Text only version */}
+          <div className="flex flex-col items-center mx-4 my-6">
+            <p className={`text-sm ${dark ? "text-gray-400" : "text-gray-600"}`}>
+              {trip.duration}
+            </p>
+            <div className="w-full border-t border-dashed my-2 border-gray-400"></div>
+            <p className={`text-xs ${dark ? "text-gray-400" : "text-gray-500"}`}>
+              {trip.status === 'CANCELED' ? 'Canceled' : 'Direct Flight'}
+            </p>
           </div>
 
-          {/* Arrival */}
+          {/* Arrival Info */}
           <div className="text-center">
-            <p className="text-lg font-semibold">{formatTime(trip.arrival_datetime)}</p>
-            <p className="text-xl">{trip.arrival_airport}</p>
+            <p className={`text-base font-medium ${dark ? "text-gray-300" : "text-gray-700"}`}>
+              {formatTime(trip.arrival_datetime)}
+            </p>
+            <p className={`text-xl ${dark ? "text-gray-400" : "text-gray-500"}`}>
+              {trip.arrival_airport}
+            </p>
             <p className="text-sm">{formatDate(trip.arrival_datetime)}</p>
           </div>
         </div>
 
-        {/* Passenger count and price */}
-        <div className="flex justify-between items-center">
-          <div>
-            <span className="font-medium">{trip.passengers.length} {trip.passengers.length === 1 ? 'Passenger' : 'Passengers'}</span>
-          </div>
-          <div className="text-right">
-            <span className="text-lg font-bold">₹{(trip.price * trip.passengers.length).toLocaleString()}</span>
+        {/* Passenger count */}
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center">
+            <span>
+              <span className="font-medium">{trip.passengers.length}</span> 
+              {trip.passengers.length === 1 ? ' Passenger' : ' Passengers'}
+            </span>
+            <button 
+              className="text-[#605DEC] font-medium hover:underline"
+              onClick={() => setShowDetails(!showDetails)}
+            >
+              {showDetails ? "Hide details" : "View details"}
+            </button>
           </div>
         </div>
-        
-        {/* Toggle button */}
-        <button 
-          className="mt-3 text-[#605DEC] font-medium hover:underline"
-          onClick={() => setShowDetails(!showDetails)}
-        >
-          {showDetails ? "Hide details" : "View details"}
-        </button>
       </div>
 
       {/* Expanded details section */}
@@ -103,27 +154,28 @@ const TripCard = ({ trip }) => {
         <div className={`p-4 border-t ${dark ? "border-gray-700" : "border-gray-200"}`}>
           <h4 className="font-medium mb-3">Passenger Details</h4>
           <div className="space-y-4">
-            {trip.passengers.map((passenger, index) => (
+            {trip.passengers.map((passenger) => (
               <div key={passenger.ticket_id} className={`p-3 rounded ${dark ? "bg-gray-700" : "bg-gray-50"}`}>
                 <div className="flex justify-between">
                   <span className="font-medium">{passenger.name}</span>
+                  <span className="font-medium">Seat: {passenger.seat_number || 'Not assigned'}</span>
                 </div>
-                <div className="text-sm mt-1 grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div>
-                    <span className={dark ? "text-gray-300" : "text-gray-600"}>{passenger.email}</span>
-                  </div>
-                  <div>
-                    <span className={dark ? "text-gray-300" : "text-gray-600"}>Phone: {passenger.phone}</span>
-                  </div>
-                  <div>
-                    <span className={dark ? "text-gray-300" : "text-gray-600"}>Seat: {passenger.seat_number}</span>
-                  </div>
-                  <div>
-                    <span className={dark ? "text-gray-300" : "text-gray-600"}>Ticket ID: {passenger.ticket_id}</span>
-                  </div>
+                <div className="text-sm mt-2">
+                  <div>{passenger.email}</div>
+                  <div>Phone: {passenger.phone}</div>
+                  <div>Ticket ID: {passenger.ticket_id}</div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {trip.status === 'CANCELED' && (
+        <div className={`p-4 ${statusInfo.bgColor}`}>
+          <div>
+            <p className="font-medium">Flight was canceled by the airline.</p>
+            <p className="text-sm">A refund has been processed for this booking.</p>
           </div>
         </div>
       )}

@@ -21,9 +21,9 @@ export async function GET(request) {
             WHERE f.flight_no IS NULL
         `;
 
-        // Complex query to find unused airports
+        // Complex query to find unused airports - updated for new table structure
         const unusedAirportsQuery = `
-            select a.airport_id, a.name,a.location
+            select a.airport_id, a.location
             from airports a
             where a.airport_id not in (
               select distinct r.departure_airport_id 
@@ -34,13 +34,13 @@ export async function GET(request) {
             )
         `;
 
-        // Query to find unused routes
+        // Query to find unused routes - updated for new table structure
         const unusedRoutesQuery = `
             SELECT r.route_id, 
                 r.departure_airport_id, 
-                da.name AS departure_name, 
+                da.location AS departure_location, 
                 r.arrival_airport_id, 
-                aa.name AS arrival_name
+                aa.location AS arrival_location
             FROM flight_routes r
                 LEFT JOIN airports da ON r.departure_airport_id = da.airport_id
                 LEFT JOIN airports aa ON r.arrival_airport_id = aa.airport_id

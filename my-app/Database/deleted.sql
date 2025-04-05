@@ -120,3 +120,24 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+CREATE TABLE deleted_flight_routes (
+    route_id             INT PRIMARY KEY,
+    departure_airport_id VARCHAR(3) NOT NULL,
+    arrival_airport_id   VARCHAR(3) NOT NULL,
+    deleted_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TRIGGER IF EXISTS before_flight_routes_delete;
+
+DELIMITER $$
+
+CREATE TRIGGER before_flight_routes_delete
+BEFORE DELETE ON flight_routes
+FOR EACH ROW
+BEGIN
+    INSERT INTO deleted_flight_routes (route_id, departure_airport_id, arrival_airport_id)
+    VALUES (OLD.route_id, OLD.departure_airport_id, OLD.arrival_airport_id);
+END$$
+
+DELIMITER ;

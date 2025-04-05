@@ -64,6 +64,34 @@ const MyTripsPage = () => {
     fetchTrips();
   }, [loggedIn, id]);
 
+  const getStatusDisplay = (trip) => {
+    const departure = new Date(trip.departure_datetime);
+    const arrival = new Date(trip.arrival_datetime);
+    const now = new Date();
+
+    if (trip.status === 'CANCELED') {
+      return {
+        text: "Flight Canceled - Refund Issued",
+        color: "text-orange-600"
+      };
+    } else if (now > arrival) {
+      return {
+        text: "Completed",
+        color: "text-gray-500"
+      };
+    } else if (now > departure) {
+      return {
+        text: "In Progress",
+        color: "text-blue-500"
+      };
+    } else {
+      return {
+        text: "Upcoming",
+        color: "text-green-500"
+      };
+    }
+  };
+
   // Handle login required
   const handleLoginRequired = () => {
     toggleSigninVisibility();

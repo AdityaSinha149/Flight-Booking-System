@@ -254,14 +254,14 @@ export default function UnusedResourcesPage() {
                     <thead className={dark ? 'bg-gray-700' : 'bg-gray-100'}>
                       <tr>
                         <th className="py-3 px-6 text-left font-medium">Airline Name</th>
-                        <th className="py-3 px-6 text-left font-medium">Actions</th>
+                        <th className="py-3 px-6 text-right font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-300">
                       {unusedAirlines.map((airline) => (
                         <tr key={airline.airline_name} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                           <td className="py-4 px-6">{airline.airline_name}</td>
-                          <td className="py-4 px-6">
+                          <td className="py-4 px-6 text-right">
                             <button
                               onClick={() => handleDeleteAirline(airline.airline_name)}
                               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
@@ -287,19 +287,17 @@ export default function UnusedResourcesPage() {
                   <table className="min-w-full">
                     <thead className={dark ? 'bg-gray-700' : 'bg-gray-100'}>
                       <tr>
-                        <th className="py-3 px-6 text-left font-medium">Airport ID</th>
-                        <th className="py-3 px-6 text-left font-medium">Name</th>
+                        <th className="py-3 px-6 text-left font-medium">Airport Code</th>
                         <th className="py-3 px-6 text-left font-medium">Location</th>
-                        <th className="py-3 px-6 text-left font-medium">Actions</th>
+                        <th className="py-3 px-6 text-right font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-300">
                       {unusedAirports.map((airport) => (
                         <tr key={airport.airport_id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                           <td className="py-4 px-6">{airport.airport_id}</td>
-                          <td className="py-4 px-6">{airport.name}</td>
                           <td className="py-4 px-6">{airport.location}</td>
-                          <td className="py-4 px-6">
+                          <td className="py-4 px-6 text-right">
                             <button
                               onClick={() => handleDeleteAirport(airport.airport_id)}
                               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
@@ -328,16 +326,16 @@ export default function UnusedResourcesPage() {
                         <th className="py-3 px-6 text-left font-medium">Route ID</th>
                         <th className="py-3 px-6 text-left font-medium">From</th>
                         <th className="py-3 px-6 text-left font-medium">To</th>
-                        <th className="py-3 px-6 text-left font-medium">Actions</th>
+                        <th className="py-3 px-6 text-right font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-300">
                       {unusedRoutes.map((route) => (
                         <tr key={route.route_id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                           <td className="py-4 px-6">{route.route_id}</td>
-                          <td className="py-4 px-6">{route.departure_airport_id} ({route.departure_name})</td>
-                          <td className="py-4 px-6">{route.arrival_airport_id} ({route.arrival_name})</td>
-                          <td className="py-4 px-6">
+                          <td className="py-4 px-6">{route.departure_airport_id} ({route.departure_location})</td>
+                          <td className="py-4 px-6">{route.arrival_airport_id} ({route.arrival_location})</td>
+                          <td className="py-4 px-6 text-right">
                             <button
                               onClick={() => handleDeleteRoute(route.route_id)}
                               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
