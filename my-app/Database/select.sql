@@ -3,52 +3,45 @@ mysql> SELECT * FROM admin;
 | admin_id | email                 | phone_no | pass                                                         | airline_name | first_name | last_name  |
 +----------+-----------------------+----------+--------------------------------------------------------------+--------------+------------+------------+
 |        1 | am@gmail.com          | 5657     | $2b$10$MLjC8Q1Win0mQXVguoquF.BwQLrVbST.m27Kh/u64WjBmREeQx4c2 | Air India    | Ainesh     | Mohan      |
-|        2 | ss@gmail.com          | 890      | $2b$10$TJSYz0H78g.RVXnW57XsJerDDzJ.2a8atNp/rCAJ9ma6RLswHSujS | AirAsia      | Sharanya   | Shetty     |
 |        4 | Hs@gmail.co           | 7878     | $2b$10$uFdaj0sjYRnt5AJovH.mdudO6Zdw0FuTVNCFyCTGRK4XyVwN.Ioy2 | IndiGo       | Harshit    | Srivastava |
 |        5 | abhinav6137@gmail.com | 234      | $2b$10$gAZR6r9j/p9Jl.0mCg2huOPhoOs0.pILdu12qbp1Qo1cF16u/pezu | GoAir        | Abhinav    | Mohapatra  |
 |        6 | ac@gmail.com          | 4367     | $2b$10$3lgz22S8ACdD6tZThQZbt.P61y.vrutlzJV7rQGcU6iRgQMJSVtri | GoAir        | Ajitha     | Chalasani  |
-|        7 | ak@gmail.com          | 092      | $2b$10$AYqsUCC6G.Ii9tgdD8jmb.bDyye80UFXP4iQBezLBNZzCmQuEEajC | AirAsia      | Anisha     | Kumari     |
 |        8 | mn@gmail.com          | 531768   | $2b$10$KuCRo5jgAp5EmO2HLYr/COF65UYKoom2UcjSnQ2oVnxK9cl0r0BIu | SpiceJet     | Manvi      | Nayak      |
 +----------+-----------------------+----------+--------------------------------------------------------------+--------------+------------+------------+
-7 rows in set (0.00 sec)
+5 rows in set (0.00 sec)
 
 mysql> SELECT * FROM airlines;
 +--------------+
 | airline_name |
 +--------------+
 | Air India    |
-| AirAsia      |
 | GoAir        |
 | IndiGo       |
 | SpiceJet     |
-| Vistara      |
 +--------------+
-6 rows in set (0.00 sec)
+4 rows in set (0.00 sec)
 
 mysql> SELECT * FROM airports;
 +------------+-----------+
 | airport_id | location  |
 +------------+-----------+
 | BLR        | Bangalore |
-| BOM        | Mumbai    |
 | CCU        | Kolkata   |
 | DEL        | Delhi     |
 | HYD        | Hyderabad |
 | IXE        | Manipal   |
 | MAA        | Chennai   |
 +------------+-----------+
-7 rows in set (0.00 sec)
+6 rows in set (0.00 sec)
 
 mysql> SELECT * FROM deleted_airlines;
 +--------------+---------------------+
 | airline_name | deleted_at          |
 +--------------+---------------------+
-| Air India    | 2025-04-06 16:21:07 |
-| IndiGo       | 2025-04-06 16:21:07 |
-| SpiceJet     | 2025-04-06 16:21:07 |
-| Vistara      | 2025-04-06 16:21:07 |
+| AirAsia      | 2025-04-06 18:03:10 |
+| Vistara      | 2025-04-06 18:03:13 |
 +--------------+---------------------+
-4 rows in set (0.00 sec)
+2 rows in set (0.00 sec)
 
 mysql> SELECT * FROM deleted_flight_instances;
 +-------------+-----------+--------------+----------+---------------------+---------------------+---------+---------------------+
@@ -61,7 +54,15 @@ mysql> SELECT * FROM deleted_flight_instances;
 3 rows in set (0.00 sec)
 
 mysql> SELECT * FROM deleted_flight_routes;
-Empty set (0.00 sec)
++----------+----------------------+--------------------+---------------------+
+| route_id | departure_airport_id | arrival_airport_id | deleted_at          |
++----------+----------------------+--------------------+---------------------+
+|        1 | DEL                  | BOM                | 2025-04-06 17:59:26 |
+|        3 | BOM                  | MAA                | 2025-04-06 17:59:28 |
+|        4 | BLR                  | HYD                | 2025-04-06 17:59:32 |
+|        7 | CCU                  | BOM                | 2025-04-06 17:59:36 |
++----------+----------------------+--------------------+---------------------+
+4 rows in set (0.00 sec)
 
 mysql> SELECT * FROM deleted_flights;
 +-----------+--------------+----------+---------------------+
@@ -98,16 +99,12 @@ mysql> SELECT * FROM flight_routes;
 +----------+----------------------+--------------------+
 | route_id | departure_airport_id | arrival_airport_id |
 +----------+----------------------+--------------------+
-|        1 | DEL                  | BOM                |
 |        2 | DEL                  | BLR                |
-|        3 | BOM                  | MAA                |
-|        4 | BLR                  | HYD                |
 |        5 | MAA                  | CCU                |
 |        6 | HYD                  | DEL                |
-|        7 | CCU                  | BOM                |
 |        8 | IXE                  | BLR                |
 +----------+----------------------+--------------------+
-8 rows in set (0.00 sec)
+4 rows in set (0.00 sec)
 
 mysql> SELECT * FROM flights;
 +-----------+--------------+----------+
