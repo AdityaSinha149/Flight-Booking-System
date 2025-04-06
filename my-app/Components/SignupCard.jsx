@@ -114,8 +114,7 @@ function SignupCard() {
         className="w-full bg-[#605DEC] text-white py-2 rounded mb-3 flex justify-center items-center"
         onClick={handleSignup}
         disabled={loading}
-      ></button>
-      <button>
+      >
         {loading ? (
           <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5"></span>
         ) : (

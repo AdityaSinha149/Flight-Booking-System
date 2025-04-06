@@ -17,13 +17,14 @@ INSERT INTO flights (flight_no, airline_name) VALUES
 (106, 'AirAsia');
 
 -- Insert airports (with correct 3-letter IATA codes as location)
-INSERT INTO airports (airport_id, name, location) VALUES
-('DEL', 'Indira Gandhi International Airport', 'DEL'),
-('BOM', 'Chhatrapati Shivaji Maharaj International Airport', 'BOM'),
-('BLR', 'Kempegowda International Airport', 'BLR'),
-('MAA', 'Chennai International Airport', 'MAA'),
-('HYD', 'Rajiv Gandhi International Airport', 'HYD'),
-('CCU', 'Netaji Subhas Chandra Bose International Airport', 'CCU');
+INSERT INTO airports (airport_id, city_name) VALUES 
+('DEL', 'Delhi'),
+('BOM', 'Mumbai'),
+('BLR', 'Bangalore'),
+('MAA', 'Chennai'),
+('HYD', 'Hyderabad'),
+('CCU', 'Kolkata');
+
 
 -- Insert flight routes
 INSERT INTO flight_routes (departure_airport_id, arrival_airport_id) VALUES
