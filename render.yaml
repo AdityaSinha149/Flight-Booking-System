@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: flight-booking-system
+    env: node
+    plan: free
+    buildCommand: cd my-app && npm install && npm run build
+    startCommand: cd my-app && npm start
+    rootDirectory: ./
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # This will prompt you to enter the value during deployment
+      - key: DATABASE_HOST
+        sync: false
+      - key: DATABASE_USER
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: DATABASE_NAME
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_RAZORPAY_KEY_ID
+        sync: false
+
+databases:
+  # Note: Render's free plan doesn't include MySQL databases
+  # You'll need to use an external MySQL database service
+  # such as PlanetScale, AWS RDS, or DigitalOcean
+  # and add the connection details in the environment variables above
