@@ -6,6 +6,10 @@ services:
     buildCommand: cd my-app && npm install && npm run build
     startCommand: cd my-app && npm start
     rootDirectory: ./
+    # Adding health check for better monitoring
+    healthCheckPath: /api/health
+    # Adding auto-deploy configuration
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
@@ -25,6 +29,9 @@ services:
         sync: false
       - key: NEXT_PUBLIC_RAZORPAY_KEY_ID
         sync: false
+      # Adding a port variable in case your app needs it
+      - key: PORT
+        value: 8080
 
 databases:
   # Note: Render's free plan doesn't include MySQL databases
