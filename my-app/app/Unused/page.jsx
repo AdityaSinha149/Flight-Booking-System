@@ -389,7 +389,7 @@ export default function UnusedResourcesPage() {
                         return (
                           <tr key={instance.instance_id} className={`hover:bg-gray-100 dark:hover:bg-gray-700 ${expired ? 'text-red-500' : ''}`}>
                             <td className="py-4 px-6">{instance.instance_id}</td>
-                            <td className="py-4 px-6">{instance.flight_no}</td>
+                            <td className="py-4 px-6">{instance.airline_name} {instance.flight_no}</td>
                             <td className="py-4 px-6">
                               {instance.departure_airport_id} → {instance.arrival_airport_id}
                             </td>

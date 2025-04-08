@@ -262,6 +262,23 @@ const SeatSelection = () => {
         {/* Left Section - Seat Map Panel */}
         <div className="w-1/2 border-r border-gray-300 p-4 flex flex-col">
           <h2 className="text-xl font-semibold mb-4 text-center">Select Your Seat</h2>
+          
+          {/* Seat Legend */}
+          <div className="mb-4 flex justify-center gap-4">
+            <div className="flex items-center">
+              <div className="w-5 h-5 bg-green-400 rounded mr-2"></div>
+              <span className="text-sm">Available</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-5 h-5 bg-[#605DEC] rounded mr-2"></div>
+              <span className="text-sm">Selected</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-5 h-5 bg-gray-300 rounded mr-2"></div>
+              <span className="text-sm">Booked</span>
+            </div>
+          </div>
+          
           <div className="flex-1 flex flex-col">
             {/* Add custom CSS for hiding scrollbar */}
             <style jsx>{`
@@ -283,7 +300,7 @@ const SeatSelection = () => {
 
             <div
               className={`${dark ? "bg-gray-800" : "bg-blue-100"} p-4 rounded-lg shadow-lg overflow-auto scrollbar-hide`}
-              style={{ maxHeight: "calc(100vh - 140px)" }}
+              style={{ maxHeight: "calc(100vh - 180px)" }} // Adjusted height to account for legend
             >
               <div className="seat-container">
                 {/* Seat layout with aisle */}

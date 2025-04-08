@@ -1,7 +1,7 @@
 CREATE TABLE airports (
     airport_id VARCHAR(3) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    location VARCHAR(255) NOT NULL
+    location VARCHAR(3) NOT NULL,
+    CONSTRAINT airport_id_chk CHECK (airport_id REGEXP '^[A-Z]{3}$'),
 );
 
 CREATE TABLE airlines (
@@ -33,12 +33,8 @@ CREATE TABLE flight_instances (
     price DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (flight_no, airline_name) REFERENCES flights(flight_no, airline_name) ON DELETE CASCADE,
     FOREIGN KEY (route_id) REFERENCES flight_routes(route_id) ON DELETE CASCADE
+    INDEX idx_flight (flight_no, airline_name)
 );
-
--- Add an index for better performance on the composite foreign key
-ALTER TABLE flight_instances 
-ADD INDEX idx_flight (flight_no, airline_name);
-
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -60,21 +56,8 @@ CREATE TABLE admin (
     admin_id INT AUTO_INCREMENT PRIMARY KEY,
     admin_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    phone_no VARCHAR(20) NOT NULL,
+    phone_no VARCHAR(20) NOT NULL UNIQUE,
     pass VARCHAR(255) NOT NULL,
     airline_name VARCHAR(100) NOT NULL,
     FOREIGN KEY (airline_name) REFERENCES airlines(airline_name) ON DELETE CASCADE
 );
-
--- Ensure admin phone numbers are unique
-ALTER TABLE admin ADD CONSTRAINT unique_admin_phone UNIQUE (phone_no);
-
-
-ALTER TABLE airports
-DROP COLUMN name,
-MODIFY COLUMN location VARCHAR(255) NOT NULL;
-
-
-ALTER TABLE airports
-ADD CONSTRAINT airport_id_chk
-CHECK (regexp_like(airport_id, '^[A-Z]{3}$'));

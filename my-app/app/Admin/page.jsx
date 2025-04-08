@@ -285,12 +285,14 @@ export default function AdminPage() {
             </select>
           </div>
           {!addingNewLocation && (
-            <button
-              onClick={() => setAddingNewLocation(true)}
-              className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
-            >
-              Add new airport
-            </button>
+            <div className="flex justify-center">
+              <button
+                onClick={() => setAddingNewLocation(true)}
+                className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
+              >
+                Add new airport
+              </button>
+            </div>
           )}
           {addingNewLocation && (
             <div className="grid grid-cols-2 gap-2 mb-2 mt-2">
@@ -308,12 +310,24 @@ export default function AdminPage() {
                 onChange={(e) => setNewAirportLocation(e.target.value)}
                 className="border p-2 rounded text-black"
               />
-              <button
-                onClick={handleAddAirport}
-                className="bg-[#605DEC] text-white px-4 py-2 rounded-md col-span-2"
-              >
-                Submit airport
-              </button>
+              <div className="col-span-2 flex justify-center space-x-2 mt-2">
+                <button
+                  onClick={handleAddAirport}
+                  className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
+                >
+                  Submit Airport
+                </button>
+                <button
+                  onClick={() => {
+                    setAddingNewLocation(false);
+                    setNewAirportId("");
+                    setNewAirportLocation("");
+                  }}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -375,17 +389,36 @@ export default function AdminPage() {
                 min="1"
                 className="border p-2 rounded text-black"
               />
+              <div className="col-span-2 flex justify-center space-x-2 mt-2">
+                <button
+                  onClick={handleCreateFlight}
+                  className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
+                >
+                  Submit Flight
+                </button>
+                <button
+                  onClick={() => {
+                    setCreatingNewFlight(false);
+                    setNewFlightNo("");
+                    setNewFlightCapacity("");
+                  }}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
-          <button
-            onClick={() => {
-              if (creatingNewFlight) handleCreateFlight();
-              else setCreatingNewFlight(true);
-            }}
-            className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
-          >
-            {creatingNewFlight ? "Submit new flight" : "Create new flight"}
-          </button>
+          {!creatingNewFlight && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => setCreatingNewFlight(true)}
+                className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
+              >
+                Create new flight
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={dark ? "bg-gray-800 shadow-md rounded p-4 mb-8" : "bg-gray-300 shadow-md rounded p-4 mb-8"}>
@@ -418,69 +451,71 @@ export default function AdminPage() {
               />
             </div>
           </div>
-          <button
-            onClick={async () => {
-              if (!departureAirport || !arrivalAirport || !flightNo || !departureTime || !arrivalTime || !price) {
-                setError("All fields are required for creating an instance.");
-                return;
-              }
-              
-              // Validate that departure time is before arrival time
-              const departureDate = new Date(departureTime);
-              const arrivalDate = new Date(arrivalTime);
-              
-              if (departureDate >= arrivalDate) {
-                setError("Departure time must be before arrival time.");
-                return;
-              }
-              
-              setError("");
+          <div className="flex justify-center">
+            <button
+              onClick={async () => {
+                if (!departureAirport || !arrivalAirport || !flightNo || !departureTime || !arrivalTime || !price) {
+                  setError("All fields are required for creating an instance.");
+                  return;
+                }
+                
+                // Validate that departure time is before arrival time
+                const departureDate = new Date(departureTime);
+                const arrivalDate = new Date(arrivalTime);
+                
+                if (departureDate >= arrivalDate) {
+                  setError("Departure time must be before arrival time.");
+                  return;
+                }
+                
+                setError("");
 
-              // Get or create route
-              const routeRes = await fetch("/api/getRoutes", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ departureAirport, arrivalAirport }),
-              });
-              const routeData = await routeRes.json();
-              if (!routeData.success) {
-                setError(routeData.error || "Error creating or fetching route.");
-                return;
-              }
+                // Get or create route
+                const routeRes = await fetch("/api/getRoutes", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ departureAirport, arrivalAirport }),
+                });
+                const routeData = await routeRes.json();
+                if (!routeData.success) {
+                  setError(routeData.error || "Error creating or fetching route.");
+                  return;
+                }
 
-              // Create flight instance with routeId
-              const selectedFlight = filteredFlights.find((f) => f.flight_no == flightNo);
-              const airlineName = selectedFlight ? selectedFlight.airline_name : "";
-              const res = await fetch("/api/createInstance", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  routeId: routeData.routeId,
-                  flightNo,
-                  airlineName,
-                  departureTime,
-                  arrivalTime,
-                  price,
-                }),
-              });
-              const data = await res.json();
-              if (!data.success) {
-                setError(data.message || "Error creating flight instance.");
-                return;
-              }
-              setSuccess("Flight instance created successfully!");
-              setFlightNo("");
-              setDepartureTime("");
-              setArrivalTime("");
-              setPrice("");
-              setDepartureAirport("");
-              setArrivalAirport("");
-              setTimeout(() => setSuccess(""), 3000);
-            }}
-            className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
-          >
-            Create Flight Instance
-          </button>
+                // Create flight instance with routeId
+                const selectedFlight = filteredFlights.find((f) => f.flight_no == flightNo);
+                const airlineName = selectedFlight ? selectedFlight.airline_name : "";
+                const res = await fetch("/api/createInstance", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    routeId: routeData.routeId,
+                    flightNo,
+                    airlineName,
+                    departureTime,
+                    arrivalTime,
+                    price,
+                  }),
+                });
+                const data = await res.json();
+                if (!data.success) {
+                  setError(data.message || "Error creating flight instance.");
+                  return;
+                }
+                setSuccess("Flight instance created successfully!");
+                setFlightNo("");
+                setDepartureTime("");
+                setArrivalTime("");
+                setPrice("");
+                setDepartureAirport("");
+                setArrivalAirport("");
+                setTimeout(() => setSuccess(""), 3000);
+              }}
+              className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
+            >
+              Create Flight Instance
+            </button>
+          </div>
         </div>
       </div>
       
