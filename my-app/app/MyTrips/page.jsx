@@ -26,7 +26,6 @@ const MyTripsPage = () => {
       }
 
       try {
-        console.log("Fetching trips with user ID:", id);
         const response = await fetch('/api/myTrips', {
           method: 'POST',
           headers: {
