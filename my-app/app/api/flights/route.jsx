@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-};
+import db from "@/lib/db";
 
 export async function POST(request) {
-    let db;
     try {
       const { 
         start_airport, 
@@ -47,7 +39,7 @@ export async function POST(request) {
         orderBy = 'fi.airline_name';
       }
       
-      const query = `
+      const sql = `
         SELECT 
           fi.instance_id AS instance_id,
           fi.flight_no AS flight_no,
@@ -75,23 +67,19 @@ export async function POST(request) {
           AND fr.arrival_airport_id = ?
           AND DATE(fi.departure_time) = DATE(?)
           AND (f.max_seat - IFNULL(booked.seat_count, 0)) >= ?
-        ORDER BY ${orderBy} ${actualSortOrder === 'desc' ? 'DESC' : 'ASC'};
+        ORDER BY ${orderBy} ${actualSortOrder === 'desc' ? 'DESC' : 'ASC'}
       `;
       
-      db = await mysql.createConnection(dbConfig);
-      const [rows] = await db.execute(query, [
+      const [rows] = await db.execute(sql, [
         start_airport,
         start_airport,
         end_airport,
         travel_date,
         seats_needed
       ]);
-  
-      await db.end();
 
       return NextResponse.json(rows);
     } catch (error) {
-      if (db) await db.end();
       return NextResponse.json(
         { error: "Database error", details: error.message },
         { status: 500 }

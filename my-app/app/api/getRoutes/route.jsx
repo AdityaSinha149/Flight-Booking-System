@@ -1,34 +1,18 @@
 import { NextResponse } from 'next/server';
-import mysql from "mysql2/promise";
+import { query, getConnection } from "@/lib/db";
 
 export async function GET() {
-  let connection;
   try {
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-    });
-
-    const [rows] = await connection.execute("SELECT * FROM flight_routes", []);
+    const rows = await query("SELECT * FROM flight_routes");
     return NextResponse.json(rows);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
-  } finally {
-    if (connection) await connection.end();
   }
 }
 
 export async function POST(request) {
   let connection;
   try {
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-    });
     const { departureAirport, arrivalAirport } = await request.json();
     
     // Check for missing parameters
@@ -39,6 +23,8 @@ export async function POST(request) {
       }, { status: 400 });
     }
     
+    connection = await getConnection();
+    
     // Look for existing route
     const [existing] = await connection.execute(
       "SELECT route_id FROM flight_routes WHERE departure_airport_id=? AND arrival_airport_id=?",
@@ -46,6 +32,7 @@ export async function POST(request) {
     );
     
     if (existing.length > 0) {
+      connection.release();
       return NextResponse.json({ success: true, routeId: existing[0].route_id });
     }
     
@@ -57,6 +44,7 @@ export async function POST(request) {
     
     // Get the newly inserted ID
     const newRouteId = result.insertId;
+    connection.release();
     return NextResponse.json({ success: true, routeId: newRouteId });
   } catch (error) {
     console.error("getRoutes POST error:", error);
@@ -65,6 +53,6 @@ export async function POST(request) {
       error: error.message || "Failed to create route"
     }, { status: 500 });
   } finally {
-    if (connection) await connection.end();
+    if (connection) connection.release();
   }
 }

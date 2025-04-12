@@ -9,7 +9,7 @@ import { usePassenger } from "@/Contexts/PassengerContext";
 
 export default function SearchBar() {
   const { dark } = useTheme();
-  const [locations, setLocations] = useState([]);
+  const [locations, setLocations] = useState([]); // Initialize as empty array
   const [showFromDropdown, setShowFromDropdown] = useState(false);
   const [showToDropdown, setShowToDropdown] = useState(false);
   const [selectedFromIndex, setSelectedFromIndex] = useState(0);
@@ -91,19 +91,41 @@ export default function SearchBar() {
 
   useEffect(() => {
     fetch("/api/locations")
-      .then((res) => res.json())
-      .then((data) => setLocations(data))
-      .catch((err) => console.error("Error fetching locations:", err));
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch locations");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        // Ensure data is an array before setting it to state
+        if (Array.isArray(data)) {
+          setLocations(data);
+        } else {
+          console.error("Locations data is not an array:", data);
+          setLocations([]); // Set to empty array if data is not an array
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching locations:", err);
+        setLocations([]); // Set to empty array on error
+      });
   }, []);
 
   const formatLocation = (loc) => `${loc.location} (${loc.airport_id})`;
 
-  const filterLocations = (input) =>
-    locations.filter(
+  const filterLocations = (input) => {
+    // Guard against locations not being an array
+    if (!Array.isArray(locations)) {
+      return [];
+    }
+    
+    return locations.filter(
       ({ location, airport_id }) =>
         location.toLowerCase().startsWith(input.toLowerCase()) ||
         airport_id.toLowerCase().startsWith(input.toLowerCase())
     );
+  };
 
   const filteredFrom = filterLocations(fromInput);
   const filteredTo = filterLocations(toInput);

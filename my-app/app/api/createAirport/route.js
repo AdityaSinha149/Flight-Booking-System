@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
-import mysql from "mysql2/promise";
+import db from "@/lib/db";
 
 export async function POST(request) {
   let connection;
   try {
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-    });
+    connection = await db.getConnection();
     
     const { airportId, location } = await request.json();
     
@@ -20,6 +15,7 @@ export async function POST(request) {
     );
     
     if (existing.length > 0) {
+      connection.release();
       return NextResponse.json({ 
         success: false, 
         error: `Airport with code ${airportId} already exists` 
@@ -35,11 +31,12 @@ export async function POST(request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Database error:", error);
+    if (connection) connection.release();
     return NextResponse.json({ 
       success: false, 
       error: error.message || "Failed to add airport" 
     }, { status: 500 });
   } finally {
-    if (connection) await connection.end();
+    if (connection) connection.release();
   }
 }

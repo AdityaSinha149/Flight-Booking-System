@@ -1,22 +1,12 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-};
+import db from "@/lib/db";
 
 export async function GET(request) {
-  let db;
   try {
     const { searchParams } = new URL(request.url);
     const airline = searchParams.get("airline");
 
-    db = await mysql.createConnection(dbConfig);
-
-    let query = `
+    let sql = `
       SELECT 
         t.ticket_id,
         t.seat_number,
@@ -40,18 +30,15 @@ export async function GET(request) {
 
     let params = [];
     if (airline) {
-      query += " WHERE f.airline_name = ?";
+      sql += " WHERE f.airline_name = ?";
       params.push(airline);
     }
 
-    query += " ORDER BY f.airline_name, t.seat_number";
+    sql += " ORDER BY f.airline_name, t.seat_number";
 
-    const [bookings] = await db.execute(query, params);
-
-    await db.end();
+    const [bookings] = await db.execute(sql, params);
     return NextResponse.json(bookings);
   } catch (error) {
-    if (db) await db.end();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }

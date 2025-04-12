@@ -17,7 +17,6 @@ const MyTripsPage = () => {
   const { dark } = useTheme();
   const router = useRouter();
 
-  // Fetch user's trips when the component mounts
   useEffect(() => {
     const fetchTrips = async () => {
       if (!loggedIn) {
@@ -34,26 +33,14 @@ const MyTripsPage = () => {
           body: JSON.stringify({ user_id: id }),
         });
 
-        // First check if the response is OK
         if (!response.ok) {
-          // For error responses, try to get error details if possible
-          let errorMessage;
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.error || `Status: ${response.status}`;
-          } catch (jsonError) {
-            // If we can't parse the JSON, use the status text
-            errorMessage = response.statusText || response.status;
-          }
-          throw new Error(`API Error: ${errorMessage}`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Status: ${response.status}`);
         }
 
-        // Only try to parse JSON for successful responses
         const data = await response.json();
         setTrips(data);
-        setError(null);
       } catch (err) {
-        console.error('Error fetching trips:', err);
         setError(`Failed to load your trips: ${err.message}`);
       } finally {
         setLoading(false);
@@ -91,11 +78,6 @@ const MyTripsPage = () => {
     }
   };
 
-  // Handle login required
-  const handleLoginRequired = () => {
-    toggleSigninVisibility();
-  };
-
   return (
     <div className={`min-h-screen ${dark ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'}`}>
       <Navbar />
@@ -111,12 +93,11 @@ const MyTripsPage = () => {
           </button>
         </div>
         
-        {/* If not logged in */}
         {!loggedIn && !loading && (
           <div className={`p-8 rounded-lg shadow-md text-center ${dark ? 'bg-gray-800' : 'bg-white'}`}>
             <h2 className="text-xl mb-4">You need to sign in to view your trips</h2>
             <button 
-              onClick={handleLoginRequired}
+              onClick={toggleSigninVisibility}
               className="px-6 py-2 bg-[#605DEC] text-white rounded-md hover:bg-[#4d4aa8] transition"
             >
               Sign In
@@ -124,14 +105,12 @@ const MyTripsPage = () => {
           </div>
         )}
         
-        {/* Loading state */}
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#605DEC]"></div>
           </div>
         )}
         
-        {/* Error state */}
         {error && (
           <div className={`p-4 mb-6 rounded-md ${dark ? 'bg-red-900' : 'bg-red-100 text-red-800'}`}>
             <p>{error}</p>
@@ -144,7 +123,6 @@ const MyTripsPage = () => {
           </div>
         )}
         
-        {/* No trips found */}
         {loggedIn && !loading && !error && trips.length === 0 && (
           <div className={`p-8 rounded-lg shadow-md text-center ${dark ? 'bg-gray-800' : 'bg-white'}`}>
             <h2 className="text-xl mb-4">You haven't booked any trips yet</h2>
@@ -158,7 +136,6 @@ const MyTripsPage = () => {
           </div>
         )}
         
-        {/* Trip list */}
         {loggedIn && trips.length > 0 && (
           <div className="space-y-6">
             {trips.map((trip) => (
@@ -167,6 +144,7 @@ const MyTripsPage = () => {
           </div>
         )}
       </div>
+      
       {isSignupVisible && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
           <SignupCard />

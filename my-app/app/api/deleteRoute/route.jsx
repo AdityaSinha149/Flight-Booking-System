@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-};
+import { query } from "@/lib/db";
 
 export async function DELETE(request) {
-  let db;
   try {
     const { routeId } = await request.json();
 
@@ -20,9 +12,10 @@ export async function DELETE(request) {
       );
     }
 
-    db = await mysql.createConnection(dbConfig);
-    const query = `DELETE FROM flight_routes WHERE route_id = ?`;
-    const [result] = await db.execute(query, [routeId]);
+    const result = await query(
+      `DELETE FROM flight_routes WHERE route_id = ?`, 
+      [routeId]
+    );
 
     if (result.affectedRows === 0) {
       return NextResponse.json(
@@ -31,10 +24,8 @@ export async function DELETE(request) {
       );
     }
 
-    await db.end();
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (db) await db.end();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }

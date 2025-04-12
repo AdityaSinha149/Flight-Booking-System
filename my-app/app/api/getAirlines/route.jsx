@@ -1,23 +1,15 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-};
+import db from "@/lib/db";
 
 export async function GET() {
-  let db;
+  let connection;
   try {
-    db = await mysql.createConnection(dbConfig);
-    const query = `SELECT airline_name FROM airlines ORDER BY airline_name`;
-    const [rows] = await db.execute(query);
-    await db.end();
+    connection = await db.getConnection();
+    const [rows] = await connection.execute("SELECT airline_name FROM airlines ORDER BY airline_name");
+    connection.release();
     return NextResponse.json(rows);
   } catch (error) {
-    if (db) await db.end();
+    if (connection) connection.release();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }

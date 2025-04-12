@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import mysql from "mysql2/promise";
+import { getConnection } from "@/lib/db";
 
 export async function DELETE(request) {
   const flightNo = request.nextUrl?.searchParams?.get("flightNo");
@@ -11,12 +11,7 @@ export async function DELETE(request) {
   
   let connection;
   try {
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-    });
+    connection = await getConnection();
 
     // Start a transaction for safety
     await connection.beginTransaction();
@@ -44,6 +39,6 @@ export async function DELETE(request) {
     }
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   } finally {
-    if (connection) await connection.end();
+    if (connection) connection.release();
   }
 }

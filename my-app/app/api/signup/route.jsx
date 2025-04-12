@@ -1,16 +1,6 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
 import bcrypt from "bcrypt";
-
-const pool = mysql.createPool({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+import db from "@/lib/db";
 
 export async function POST(req) {
   let connection;
@@ -21,8 +11,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
+    connection = await db.getConnection();
 
     // Check if email or phone number already exists
     const [existingUser] = await connection.execute(
@@ -31,7 +20,6 @@ export async function POST(req) {
     );
 
     if (existingUser.length) {
-      await connection.rollback();
       connection.release();
       return NextResponse.json({ error: "Email or phone number already registered" }, { status: 409 });
     }
@@ -45,17 +33,13 @@ export async function POST(req) {
       [firstName, lastName, email, phone_no, hashedPassword]
     );
 
-    await connection.commit();
     connection.release();
     
     return NextResponse.json({ message: "Signup successful!", userId: result.insertId }, { status: 201 });
 
   } catch (error) {
     console.error("Database Error:", error);
-    if (connection) {
-      await connection.rollback();
-      connection.release();
-    }
+    if (connection) connection.release();
     return NextResponse.json({ error: "Database error", details: error.message }, { status: 500 });
   }
 }

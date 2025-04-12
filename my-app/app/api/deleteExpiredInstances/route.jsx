@@ -1,46 +1,43 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-};
+import db from "@/lib/db";
 
 export async function DELETE(request) {
-  let db;
+  let connection;
   try {
-    db = await mysql.createConnection(dbConfig);
+    connection = await db.getConnection();
+    
+    // Start transaction
+    await connection.beginTransaction();
 
     // Delete bookings associated with expired flight instances
-    const deleteBookingsQuery = `
+    await connection.execute(`
       DELETE FROM tickets 
       WHERE instance_id IN (
         SELECT fi.instance_id 
         FROM flight_instances fi 
         WHERE fi.departure_time < NOW() AND fi.arrival_time < NOW()
       )
-    `;
-    await db.query(deleteBookingsQuery);
+    `);
 
     // Delete expired flight instances
-    const deleteInstancesQuery = `
+    const [result] = await connection.execute(`
       DELETE FROM flight_instances 
       WHERE departure_time < NOW() AND arrival_time < NOW()
-    `;
-    const [result] = await db.query(deleteInstancesQuery);
+    `);
 
-    await db.end();
+    await connection.commit();
+    
     return NextResponse.json({
       success: true,
       deletedCount: result.affectedRows,
     });
   } catch (error) {
-    if (db) await db.end();
+    if (connection) await connection.rollback();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }
     );
+  } finally {
+    if (connection) connection.release();
   }
 }

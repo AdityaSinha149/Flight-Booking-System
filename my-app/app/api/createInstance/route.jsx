@@ -1,16 +1,8 @@
 import { NextResponse } from 'next/server';
-import mysql from "mysql2/promise";
+import { query } from "@/lib/db";
 
 export async function POST(request) {
-  let connection;
   try {
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-    });
-
     const { routeId, flightNo, airlineName, departureTime, arrivalTime, price } = await request.json();
     
     // Server-side validation: Check if departure time is before arrival time
@@ -24,7 +16,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const [checkRows] = await connection.execute(
+    const checkRows = await query(
       "SELECT * FROM flight_instances WHERE flight_no = ? AND airline_name = ? AND departure_time = ?",
       [flightNo, airlineName, departureTime]
     );
@@ -36,7 +28,7 @@ export async function POST(request) {
       });
     }
 
-    await connection.execute(
+    await query(
       "INSERT INTO flight_instances (route_id, flight_no, airline_name, departure_time, arrival_time, price) VALUES (?, ?, ?, ?, ?, ?)",
       [routeId, flightNo, airlineName, departureTime, arrivalTime, price]
     );
@@ -47,7 +39,5 @@ export async function POST(request) {
       success: false,
       message: error.message
     }, { status: 500 });
-  } finally {
-    if (connection) await connection.end();
   }
 }

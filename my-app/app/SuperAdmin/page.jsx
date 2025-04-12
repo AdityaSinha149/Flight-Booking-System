@@ -38,9 +38,25 @@ export default function SuperAdminPage() {
   }, [setSuperAdminLoggedIn, isLoggedIn]);
 
   const fetchAirlines = async () => {
-    const response = await fetch("/api/getAirlines");
-    const data = await response.json();
-    setAirlines(data);
+    try {
+      const response = await fetch('/api/getAirlines');
+      if (!response.ok) {
+        throw new Error(`Error fetching airlines: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Ensure data is an array before setting state
+      if (Array.isArray(data)) {
+        setAirlines(data);
+      } else {
+        console.error("Airlines data is not an array:", data);
+        setAirlines([]); // Initialize with empty array if response is invalid
+      }
+    } catch (error) {
+      console.error("Failed to fetch airlines:", error);
+      setAirlines([]); // Set to empty array on error
+    }
   };
 
   const toggleExpand = async (airline) => {
@@ -344,242 +360,248 @@ export default function SuperAdminPage() {
           )}
 
           <div className="space-y-4">
-            {airlines.map((airlineObj) => {
-              const airline = airlineObj.airline_name;
-              return (
-                <div 
-                  key={airline} 
-                  className={`p-4 rounded shadow ${dark ? 'bg-gray-800' : 'bg-white'}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div 
-                      className="flex items-center cursor-pointer" 
-                      onClick={() => toggleExpand(airline)}
-                    >
-                      <span className={`mr-2 text-xl transition-transform ${expanded[airline] ? 'rotate-90' : ''}`}>
-                        {expanded[airline] ? '▼' : '▶'}
-                      </span>
-                      <h2 className="text-xl font-semibold">{airline}</h2>
-                    </div>
-                    <button 
-                      onClick={() => handleDeleteAirline(airline)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm"
-                    >
-                      Delete Airline
-                    </button>
-                  </div>
-                  
-                  {expanded[airline] && (
-                    <div className="mt-4 pl-4">
-                      <div className="flex justify-between mb-3">
-                        <h3 className="text-lg font-medium">Admins</h3>
-                        <button 
-                          onClick={() => toggleAddAdminForm(airline)}
-                          className="bg-[#605DEC] text-white px-3 py-1 rounded-md text-sm"
-                        >
-                          {showAddAdmin[airline] ? 'Cancel' : '+ Add Admin'}
-                        </button>
+            {Array.isArray(airlines) && airlines.length > 0 ? (
+              airlines.map((airlineObj) => {
+                const airline = airlineObj.airline_name;
+                return (
+                  <div 
+                    key={airline} 
+                    className={`p-4 rounded shadow ${dark ? 'bg-gray-800' : 'bg-white'}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div 
+                        className="flex items-center cursor-pointer" 
+                        onClick={() => toggleExpand(airline)}
+                      >
+                        <span className={`mr-2 text-xl transition-transform ${expanded[airline] ? 'rotate-90' : ''}`}>
+                          {expanded[airline] ? '▼' : '▶'}
+                        </span>
+                        <h2 className="text-xl font-semibold">{airline}</h2>
                       </div>
-                      
-                      {showAddAdmin[airline] && (
-                        <div className={`mb-4 p-3 rounded ${dark ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                          <div className="flex flex-wrap md:flex-nowrap gap-2">
-                            <input
-                              type="text"
-                              placeholder="First Name"
-                              value={(newAdminForm[airline]?.firstName) || ""}
-                              onChange={(e) => handleAdminInputChange(airline, "firstName", e.target.value)}
-                              className={`border p-2 rounded flex-1 sm:flex-none sm:w-40 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
-                            />
-                            <input
-                              type="text"
-                              placeholder="Last Name"
-                              value={(newAdminForm[airline]?.lastName) || ""}
-                              onChange={(e) => handleAdminInputChange(airline, "lastName", e.target.value)}
-                              className={`border p-2 rounded flex-1 sm:flex-none sm:w-40 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
-                            />
-                            <input
-                              type="email"
-                              placeholder="Email"
-                              value={(newAdminForm[airline]?.email) || ""}
-                              onChange={(e) => handleAdminInputChange(airline, "email", e.target.value)}
-                              className={`border p-2 rounded flex-1 sm:flex-none sm:w-52 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
-                            />
-                            <input
-                              type="tel"
-                              placeholder="Phone"
-                              value={(newAdminForm[airline]?.phone) || ""}
-                              onChange={(e) => handleAdminInputChange(airline, "phone", e.target.value)}
-                              className={`border p-2 rounded flex-1 sm:flex-none sm:w-40 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
-                            />
-                            <input
-                              type="password"
-                              placeholder="Password"
-                              value={(newAdminForm[airline]?.password) || ""}
-                              onChange={(e) => handleAdminInputChange(airline, "password", e.target.value)}
-                              className={`border p-2 rounded flex-1 sm:flex-none sm:w-40 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
-                            />
-                            <button
-                              onClick={() => submitNewAdmin(airline)}
-                              className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
-                            >
-                              Submit
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {admins[airline] && admins[airline].length > 0 ? (
-                        <div className="overflow-x-auto">
-                          <table className={`min-w-full ${dark ? 'bg-gray-700' : 'bg-white'} border rounded`}>
-                            <thead className={dark ? 'bg-gray-600' : 'bg-gray-50'}>
-                              <tr>
-                                <th className="py-3 px-4 border-b text-center">Actions</th>
-                                <th className="py-3 px-4 border-b text-center">Name</th>
-                                <th className="py-3 px-4 border-b text-center">Email</th>
-                                <th className="py-3 px-4 border-b text-center">Phone</th>
-                                <th className="py-3 px-4 border-b text-center">Password</th>
-                                <th className="py-3 px-4 border-b text-center">Manage</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {admins[airline].map((admin) => (
-                                <tr key={admin.admin_id} className={dark ? 'hover:bg-gray-600' : 'hover:bg-gray-50'}>
-                                  <td className="py-2 px-4 border-b text-center">
-                                    <button
-                                      onClick={() => handleDeleteAdmin(admin.admin_id, airline)}
-                                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
-                                    >
-                                      Delete
-                                    </button>
-                                  </td>
-                                  <td className="py-2 px-4 border-b text-center">{admin.admin_name}</td>
-                                  <td className="py-2 px-4 border-b text-center">
-                                    {changingEmail.adminId === admin.admin_id ? (
-                                      <input
-                                        type="email"
-                                        value={newEmail}
-                                        onChange={(e) => setNewEmail(e.target.value)}
-                                        className={`border p-1 rounded w-full text-center ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
-                                        placeholder="New email address"
-                                        autoFocus
-                                      />
-                                    ) : (
-                                      admin.email
-                                    )}
-                                  </td>
-                                  <td className="py-2 px-4 border-b text-center">
-                                    {changingPhone.adminId === admin.admin_id ? (
-                                      <input
-                                        type="tel"
-                                        value={newPhone}
-                                        onChange={(e) => setNewPhone(e.target.value)}
-                                        className={`border p-1 rounded w-full text-center ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
-                                        placeholder="New phone number"
-                                        autoFocus
-                                      />
-                                    ) : (
-                                      admin.phone_no
-                                    )}
-                                  </td>
-                                  <td className="py-2 px-4 border-b text-center">
-                                    {changingPassword.adminId === admin.admin_id ? (
-                                      <input
-                                        type="password"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        className={`border p-1 rounded w-full text-center ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
-                                        placeholder="New password"
-                                        autoFocus
-                                      />
-                                    ) : (
-                                      <span>••••••••</span>
-                                    )}
-                                  </td>
-                                  <td className="py-2 px-4 border-b text-center">
-                                    <div className="flex flex-col space-y-1">
-                                      {changingPassword.adminId === admin.admin_id ? (
-                                        <div className="flex justify-center space-x-2">
-                                          <button
-                                            onClick={submitPasswordChange}
-                                            className="bg-[#605DEC] text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Save
-                                          </button>
-                                          <button
-                                            onClick={() => setChangingPassword({ adminId: null, airline: null })}
-                                            className="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Cancel
-                                          </button>
-                                        </div>
-                                      ) : changingPhone.adminId === admin.admin_id ? (
-                                        <div className="flex justify-center space-x-2">
-                                          <button
-                                            onClick={submitPhoneChange}
-                                            className="bg-[#605DEC] text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Save
-                                          </button>
-                                          <button
-                                            onClick={() => setChangingPhone({ adminId: null, airline: null })}
-                                            className="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Cancel
-                                          </button>
-                                        </div>
-                                      ) : changingEmail.adminId === admin.admin_id ? (
-                                        <div className="flex justify-center space-x-2">
-                                          <button
-                                            onClick={submitEmailChange}
-                                            className="bg-[#605DEC] text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Save
-                                          </button>
-                                          <button
-                                            onClick={() => setChangingEmail({ adminId: null, airline: null })}
-                                            className="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Cancel
-                                          </button>
-                                        </div>
-                                      ) : (
-                                        <>
-                                          <button
-                                            onClick={() => startPasswordChange(admin.admin_id, airline)}
-                                            className="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Change Password
-                                          </button>
-                                          <button
-                                            onClick={() => startPhoneChange(admin.admin_id, airline)}
-                                            className="bg-cyan-500 hover:bg-cyan-600 text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Change Phone
-                                          </button>
-                                          <button
-                                            onClick={() => startEmailChange(admin.admin_id, airline)}
-                                            className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-md text-xs"
-                                          >
-                                            Change Email
-                                          </button>
-                                        </>
-                                      )}
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p className="text-center py-4 italic">No admins found for this airline.</p>
-                      )}
+                      <button 
+                        onClick={() => handleDeleteAirline(airline)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm"
+                      >
+                        Delete Airline
+                      </button>
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                    
+                    {expanded[airline] && (
+                      <div className="mt-4 pl-4">
+                        <div className="flex justify-between mb-3">
+                          <h3 className="text-lg font-medium">Admins</h3>
+                          <button 
+                            onClick={() => toggleAddAdminForm(airline)}
+                            className="bg-[#605DEC] text-white px-3 py-1 rounded-md text-sm"
+                          >
+                            {showAddAdmin[airline] ? 'Cancel' : '+ Add Admin'}
+                          </button>
+                        </div>
+                        
+                        {showAddAdmin[airline] && (
+                          <div className={`mb-4 p-3 rounded ${dark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                            <div className="flex flex-wrap md:flex-nowrap gap-2">
+                              <input
+                                type="text"
+                                placeholder="First Name"
+                                value={(newAdminForm[airline]?.firstName) || ""}
+                                onChange={(e) => handleAdminInputChange(airline, "firstName", e.target.value)}
+                                className={`border p-2 rounded flex-1 sm:flex-none sm:w-40 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Last Name"
+                                value={(newAdminForm[airline]?.lastName) || ""}
+                                onChange={(e) => handleAdminInputChange(airline, "lastName", e.target.value)}
+                                className={`border p-2 rounded flex-1 sm:flex-none sm:w-40 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
+                              />
+                              <input
+                                type="email"
+                                placeholder="Email"
+                                value={(newAdminForm[airline]?.email) || ""}
+                                onChange={(e) => handleAdminInputChange(airline, "email", e.target.value)}
+                                className={`border p-2 rounded flex-1 sm:flex-none sm:w-52 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
+                              />
+                              <input
+                                type="tel"
+                                placeholder="Phone"
+                                value={(newAdminForm[airline]?.phone) || ""}
+                                onChange={(e) => handleAdminInputChange(airline, "phone", e.target.value)}
+                                className={`border p-2 rounded flex-1 sm:flex-none sm:w-40 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
+                              />
+                              <input
+                                type="password"
+                                placeholder="Password"
+                                value={(newAdminForm[airline]?.password) || ""}
+                                onChange={(e) => handleAdminInputChange(airline, "password", e.target.value)}
+                                className={`border p-2 rounded flex-1 sm:flex-none sm:w-40 ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
+                              />
+                              <button
+                                onClick={() => submitNewAdmin(airline)}
+                                className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
+                              >
+                                Submit
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {admins[airline] && admins[airline].length > 0 ? (
+                          <div className="overflow-x-auto">
+                            <table className={`min-w-full ${dark ? 'bg-gray-700' : 'bg-white'} border rounded`}>
+                              <thead className={dark ? 'bg-gray-600' : 'bg-gray-50'}>
+                                <tr>
+                                  <th className="py-3 px-4 border-b text-center">Actions</th>
+                                  <th className="py-3 px-4 border-b text-center">Name</th>
+                                  <th className="py-3 px-4 border-b text-center">Email</th>
+                                  <th className="py-3 px-4 border-b text-center">Phone</th>
+                                  <th className="py-3 px-4 border-b text-center">Password</th>
+                                  <th className="py-3 px-4 border-b text-center">Manage</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {admins[airline].map((admin) => (
+                                  <tr key={admin.admin_id} className={dark ? 'hover:bg-gray-600' : 'hover:bg-gray-50'}>
+                                    <td className="py-2 px-4 border-b text-center">
+                                      <button
+                                        onClick={() => handleDeleteAdmin(admin.admin_id, airline)}
+                                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
+                                      >
+                                        Delete
+                                      </button>
+                                    </td>
+                                    <td className="py-2 px-4 border-b text-center">{admin.admin_name}</td>
+                                    <td className="py-2 px-4 border-b text-center">
+                                      {changingEmail.adminId === admin.admin_id ? (
+                                        <input
+                                          type="email"
+                                          value={newEmail}
+                                          onChange={(e) => setNewEmail(e.target.value)}
+                                          className={`border p-1 rounded w-full text-center ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
+                                          placeholder="New email address"
+                                          autoFocus
+                                        />
+                                      ) : (
+                                        admin.email
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-4 border-b text-center">
+                                      {changingPhone.adminId === admin.admin_id ? (
+                                        <input
+                                          type="tel"
+                                          value={newPhone}
+                                          onChange={(e) => setNewPhone(e.target.value)}
+                                          className={`border p-1 rounded w-full text-center ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
+                                          placeholder="New phone number"
+                                          autoFocus
+                                        />
+                                      ) : (
+                                        admin.phone_no
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-4 border-b text-center">
+                                      {changingPassword.adminId === admin.admin_id ? (
+                                        <input
+                                          type="password"
+                                          value={newPassword}
+                                          onChange={(e) => setNewPassword(e.target.value)}
+                                          className={`border p-1 rounded w-full text-center ${dark ? 'bg-gray-600 border-gray-500' : 'bg-white'}`}
+                                          placeholder="New password"
+                                          autoFocus
+                                        />
+                                      ) : (
+                                        <span>••••••••</span>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-4 border-b text-center">
+                                      <div className="flex flex-col space-y-1">
+                                        {changingPassword.adminId === admin.admin_id ? (
+                                          <div className="flex justify-center space-x-2">
+                                            <button
+                                              onClick={submitPasswordChange}
+                                              className="bg-[#605DEC] text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Save
+                                            </button>
+                                            <button
+                                              onClick={() => setChangingPassword({ adminId: null, airline: null })}
+                                              className="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Cancel
+                                            </button>
+                                          </div>
+                                        ) : changingPhone.adminId === admin.admin_id ? (
+                                          <div className="flex justify-center space-x-2">
+                                            <button
+                                              onClick={submitPhoneChange}
+                                              className="bg-[#605DEC] text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Save
+                                            </button>
+                                            <button
+                                              onClick={() => setChangingPhone({ adminId: null, airline: null })}
+                                              className="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Cancel
+                                            </button>
+                                          </div>
+                                        ) : changingEmail.adminId === admin.admin_id ? (
+                                          <div className="flex justify-center space-x-2">
+                                            <button
+                                              onClick={submitEmailChange}
+                                              className="bg-[#605DEC] text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Save
+                                            </button>
+                                            <button
+                                              onClick={() => setChangingEmail({ adminId: null, airline: null })}
+                                              className="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Cancel
+                                            </button>
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <button
+                                              onClick={() => startPasswordChange(admin.admin_id, airline)}
+                                              className="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Change Password
+                                            </button>
+                                            <button
+                                              onClick={() => startPhoneChange(admin.admin_id, airline)}
+                                              className="bg-cyan-500 hover:bg-cyan-600 text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Change Phone
+                                            </button>
+                                            <button
+                                              onClick={() => startEmailChange(admin.admin_id, airline)}
+                                              className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-md text-xs"
+                                            >
+                                              Change Email
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <p className="text-center py-4 italic">No admins found for this airline.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <p className={`text-center py-4 ${dark ? 'text-gray-400' : 'text-gray-600'}`}>
+                No airlines available
+              </p>
+            )}
 
             {airlines.length === 0 && (
               <div className={`p-8 rounded shadow text-center ${dark ? 'bg-gray-800' : 'bg-white'}`}>

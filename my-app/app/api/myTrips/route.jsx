@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-};
+import db from "@/lib/db";
 
 export async function POST(request) {
-  let db;
   try {
     // Try to parse the request body
     let reqBody;
@@ -33,17 +25,6 @@ export async function POST(request) {
     }
 
     console.log(`Fetching trips for user_id: ${user_id}`);
-    
-    // Connect to database
-    try {
-      db = await mysql.createConnection(dbConfig);
-    } catch (dbConnectError) {
-      console.error("Database connection error:", dbConnectError);
-      return NextResponse.json(
-        { error: "Failed to connect to database", details: dbConnectError.message },
-        { status: 500 }
-      );
-    }
     
     // First query: Get active bookings
     const activeQuery = `
@@ -120,26 +101,16 @@ export async function POST(request) {
         dt.booking_time DESC
     `;
 
-    // Execute both queries
-    let activeRows, canceledRows;
-    try {
-      [activeRows] = await db.execute(activeQuery, [user_id]);
-      [canceledRows] = await db.execute(canceledQuery, [user_id]);
-      console.log(`Found ${activeRows.length} active ticket records and ${canceledRows.length} canceled ticket records`);
-    } catch (queryError) {
-      console.error("Query execution error:", queryError);
-      return NextResponse.json(
-        { error: "Database query error", details: queryError.message },
-        { status: 500 }
-      );
-    }
+    // Execute both queries using direct db.execute
+    const [activeRows] = await db.execute(activeQuery, [user_id]);
+    const [canceledRows] = await db.execute(canceledQuery, [user_id]);
+    console.log(`Found ${activeRows.length} active ticket records and ${canceledRows.length} canceled ticket records`);
     
     // Combine both result sets
     const allRows = [...activeRows, ...canceledRows];
     
     // Handle case where no trips are found
     if (allRows.length === 0) {
-      await db.end();
       return NextResponse.json([]);
     }
     
@@ -178,20 +149,21 @@ export async function POST(request) {
         phone: row.passenger_phone
       });
     });
+    
+    // Sort passengers by seat number for each trip
+    Object.values(trips).forEach(trip => {
+      trip.passengers.sort((a, b) => {
+        // Convert seat numbers to integers for proper numerical sorting
+        const seatA = parseInt(a.seat_number) || 0;
+        const seatB = parseInt(b.seat_number) || 0;
+        return seatA - seatB;
+      });
+    });
 
-    await db.end();
     return NextResponse.json(Object.values(trips));
     
   } catch (error) {
     console.error("API route error:", error);
-    if (db) {
-      try {
-        await db.end();
-      } catch (closeError) {
-        console.error("Error closing DB connection:", closeError);
-      }
-    }
-    
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }

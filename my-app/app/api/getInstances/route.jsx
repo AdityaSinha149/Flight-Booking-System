@@ -1,17 +1,10 @@
 import { NextResponse } from 'next/server';
-import mysql from "mysql2/promise";
+import db from "@/lib/db";
 
 export async function GET(request) {
   const airline = request.nextUrl?.searchParams?.get("airline") || "";
-  let connection;
   try {
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-    });
-    const query = `
+    const [rows] = await db.execute(`
       SELECT 
         fi.instance_id, 
         fi.flight_no, 
@@ -33,12 +26,10 @@ export async function GET(request) {
       WHERE f.airline_name = ?
       GROUP BY fi.instance_id
       ORDER BY fi.departure_time
-    `;
-    const [rows] = await connection.execute(query, [airline]);
+    `, [airline]);
+    
     return NextResponse.json(rows);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
-  } finally {
-    if (connection) await connection.end();
   }
 }

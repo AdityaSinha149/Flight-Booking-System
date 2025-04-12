@@ -1,16 +1,11 @@
 import { NextResponse } from 'next/server';
-import mysql from "mysql2/promise";
 import bcrypt from 'bcrypt';
+import db from "@/lib/db";
 
 export async function POST(request) {
   let connection;
   try {
-    connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-    });
+    connection = await db.getConnection();
 
     const { username, password } = await request.json();
     
@@ -41,6 +36,7 @@ export async function POST(request) {
     const [rows] = await connection.execute(query, params);
     
     if (!rows || rows.length === 0) {
+      connection.release();
       return NextResponse.json({ 
         error: `Admin not found with ${isEmail ? 'email' : 'phone number'}.` 
       }, { status: 401 });
@@ -49,10 +45,12 @@ export async function POST(request) {
     const admin = rows[0];
     const match = await bcrypt.compare(password, admin.pass || "");
     if (!match) {
+      connection.release();
       return NextResponse.json({ error: "Invalid password." }, { status: 401 });
     }
 
     // If valid, return success with admin details
+    connection.release();
     return NextResponse.json({
       adminId: admin.admin_id,
       adminName: admin.admin_name,
@@ -60,8 +58,9 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error("Admin signin error:", err);
+    if (connection) connection.release();
     return NextResponse.json({ error: err.message }, { status: 500 });
   } finally {
-    if (connection) await connection.end();
+    if (connection) connection.release();
   }
 }

@@ -1,28 +1,17 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-    host: process.env.MYSQLHOST,
-    user: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
-};
+import db from "@/lib/db";
 
 export async function GET(request) {
-    let db;
     try {
-        db = await mysql.createConnection(dbConfig);
-
-        // Query to find unused airlines (airlines with no flights)
-        const unusedAirlinesQuery = `
+        // Update to use direct db queries instead of query utility
+        const [unusedAirlines] = await db.execute(`
             SELECT a.airline_name 
             FROM airlines a
             LEFT JOIN flights f ON a.airline_name = f.airline_name
             WHERE f.flight_no IS NULL
-        `;
+        `);
 
-        // Complex query to find unused airports - updated for new table structure
-        const unusedAirportsQuery = `
+        const [unusedAirports] = await db.execute(`
             select a.airport_id, a.location
             from airports a
             where a.airport_id not in (
@@ -32,10 +21,9 @@ export async function GET(request) {
               select distinct r.arrival_airport_id 
               from flight_routes r
             )
-        `;
+        `);
 
-        // Query to find unused routes - updated for new table structure
-        const unusedRoutesQuery = `
+        const [unusedRoutes] = await db.execute(`
             SELECT r.route_id, 
                 r.departure_airport_id, 
                 da.location AS departure_location, 
@@ -48,21 +36,14 @@ export async function GET(request) {
                 SELECT DISTINCT f.route_id 
                 FROM flight_instances f
             )
-        `;
+        `);
 
-        // Execute all queries
-        const [unusedAirlines] = await db.query(unusedAirlinesQuery);
-        const [unusedAirports] = await db.query(unusedAirportsQuery);
-        const [unusedRoutes] = await db.query(unusedRoutesQuery);
-
-        await db.end();
         return NextResponse.json({
             airlines: unusedAirlines,
             airports: unusedAirports,
             routes: unusedRoutes
         });
     } catch (error) {
-        if (db) await db.end();
         return NextResponse.json(
             { error: error.message, details: error.message },
             { status: 500 }

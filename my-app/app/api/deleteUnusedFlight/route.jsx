@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-};
+import db from "@/lib/db";
 
 export async function DELETE(request) {
-  let db;
   try {
     const { searchParams } = new URL(request.url);
     const flightNo = searchParams.get("flightNo");
@@ -22,15 +14,12 @@ export async function DELETE(request) {
       );
     }
 
-    db = await mysql.createConnection(dbConfig);
-
     // Check if the flight has any instances
-    const checkInstancesQuery = `
+    const [instancesResult] = await db.execute(`
       SELECT COUNT(*) AS count 
       FROM flight_instances 
       WHERE flight_no = ? AND airline_name = ?
-    `;
-    const [instancesResult] = await db.execute(checkInstancesQuery, [flightNo, airline]);
+    `, [flightNo, airline]);
 
     if (instancesResult[0].count > 0) {
       return NextResponse.json(
@@ -40,8 +29,10 @@ export async function DELETE(request) {
     }
 
     // Delete the flight
-    const query = `DELETE FROM flights WHERE flight_no = ? AND airline_name = ?`;
-    const [result] = await db.execute(query, [flightNo, airline]);
+    const [result] = await db.execute(
+      `DELETE FROM flights WHERE flight_no = ? AND airline_name = ?`, 
+      [flightNo, airline]
+    );
 
     if (result.affectedRows === 0) {
       return NextResponse.json(
@@ -50,10 +41,8 @@ export async function DELETE(request) {
       );
     }
 
-    await db.end();
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (db) await db.end();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }

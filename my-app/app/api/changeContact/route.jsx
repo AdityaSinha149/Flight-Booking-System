@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-};
+import db from "@/lib/db";
 
 export async function POST(request) {
-  let db;
+  let connection;
   try {
     const { adminId, newContact, type } = await request.json();
 
@@ -37,10 +30,11 @@ export async function POST(request) {
     }
 
     // Check if the contact is already in use
-    db = await mysql.createConnection(dbConfig);
-    const [checkRows] = await db.execute(checkQuery, [newContact, adminId]);
+    connection = await db.getConnection();
+    const [checkRows] = await connection.execute(checkQuery, [newContact, adminId]);
 
     if (checkRows.length > 0) {
+      connection.release();
       return NextResponse.json(
         { error: `This ${type} is already in use by another admin` },
         { status: 400 }
@@ -48,12 +42,12 @@ export async function POST(request) {
     }
 
     // Update the contact
-    await db.execute(query, [newContact, adminId]);
+    await connection.execute(query, [newContact, adminId]);
 
-    await db.end();
+    connection.release();
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (db) await db.end();
+    if (connection) connection.release();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }
