@@ -23,8 +23,6 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-
-    console.log(`Fetching trips for user_id: ${user_id}`);
     
     // First query: Get active bookings
     const activeQuery = `
@@ -104,17 +102,12 @@ export async function POST(request) {
     // Execute both queries using direct db.execute
     const [activeRows] = await db.execute(activeQuery, [user_id]);
     const [canceledRows] = await db.execute(canceledQuery, [user_id]);
-    console.log(`Found ${activeRows.length} active ticket records and ${canceledRows.length} canceled ticket records`);
-    
-    // Combine both result sets
     const allRows = [...activeRows, ...canceledRows];
     
-    // Handle case where no trips are found
     if (allRows.length === 0) {
       return NextResponse.json([]);
     }
     
-    // Group the trips by instance_id AND booking_date (separate bookings made on different dates)
     const trips = {};
     allRows.forEach(row => {
       // Create a composite key using both instance_id and booking date (YYYY-MM-DD)

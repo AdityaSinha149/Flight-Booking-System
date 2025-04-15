@@ -19,25 +19,16 @@ export async function POST(request) {
         );
       }
       
-      // Validate sort parameters
-      const validSortFields = ['departure_datetime', 'price', 'duration', 'airline'];
-      const validSortOrders = ['asc', 'desc'];
+      // Simplified sort parameter validation
+      const validSortFields = {
+        'departure_datetime': 'fi.departure_time',
+        'price': 'fi.price',
+        'duration': 'TIMEDIFF(fi.arrival_time, fi.departure_time)',
+        'airline': 'fi.airline_name'
+      };
       
-      const actualSortField = validSortFields.includes(sortBy) ? sortBy : 'departure_datetime';
-      const actualSortOrder = validSortOrders.includes(sortOrder.toLowerCase()) ? sortOrder.toLowerCase() : 'asc';
-      
-      // Construct dynamic ORDER BY clause
-      let orderBy = 'fi.departure_time'; // default
-      
-      if (actualSortField === 'departure_datetime') {
-        orderBy = 'fi.departure_time';
-      } else if (actualSortField === 'price') {
-        orderBy = 'fi.price';
-      } else if (actualSortField === 'duration') {
-        orderBy = 'TIMEDIFF(fi.arrival_time, fi.departure_time)';
-      } else if (actualSortField === 'airline') {
-        orderBy = 'fi.airline_name';
-      }
+      const orderBy = validSortFields[sortBy] || validSortFields['departure_datetime'];
+      const direction = sortOrder.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
       
       const sql = `
         SELECT 
@@ -51,7 +42,6 @@ export async function POST(request) {
           DATE_FORMAT(fi.departure_time, '%h:%i %p') AS departure,
           fi.arrival_time AS arrival_datetime,
           DATE_FORMAT(fi.arrival_time, '%h:%i %p') AS arrival,
-          ? AS layover_chain,
           'Direct' AS stops,
           'Direct' AS layover_text,
           FORMAT(fi.price, 2) AS price
@@ -67,11 +57,10 @@ export async function POST(request) {
           AND fr.arrival_airport_id = ?
           AND DATE(fi.departure_time) = DATE(?)
           AND (f.max_seat - IFNULL(booked.seat_count, 0)) >= ?
-        ORDER BY ${orderBy} ${actualSortOrder === 'desc' ? 'DESC' : 'ASC'}
+        ORDER BY ${orderBy} ${direction}
       `;
       
       const [rows] = await db.execute(sql, [
-        start_airport,
         start_airport,
         end_airport,
         travel_date,

@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useTheme } from "@/Contexts/ThemeContext";
+import Ticket from './Ticket';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const TripCard = ({ trip }) => {
   const { dark } = useTheme();
   const [showDetails, setShowDetails] = useState(false);
+  const ticketRef = useRef(null);
 
   // Ensure trip is defined before accessing its properties
   if (!trip) {
@@ -60,6 +64,37 @@ const TripCard = ({ trip }) => {
       };
     }
   };
+
+  const handlePrint = () => {
+    if (ticketRef.current) {
+      html2canvas(ticketRef.current, { 
+        useCORS: true, 
+        scale: 2,
+        backgroundColor: "white" 
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        
+        // Format the flight date in DD_MM_YYYY format
+        const departureDate = new Date(trip.departure_datetime);
+        const day = String(departureDate.getDate()).padStart(2, '0');
+        const month = String(departureDate.getMonth() + 1).padStart(2, '0');
+        const year = departureDate.getFullYear();
+        const formattedFlightDate = `${day}_${month}_${year}`;
+        
+        // Create a filename, replace > with -to- and / with _
+        const filename = `${trip.departure_airport}-to-${trip.arrival_airport} ${formattedFlightDate} ${trip.airline}${trip.flight_no}.pdf`;
+        
+        pdf.save(filename);
+      }).catch(err => {
+        console.error("Error generating PDF:", err);
+        alert("Error generating ticket. Please try again later.");
+      });
+    }
+  };
   
   const statusInfo = getStatusInfo(trip);
   
@@ -91,8 +126,19 @@ const TripCard = ({ trip }) => {
               Booked on {formatDate(trip.booking_date)}
             </p>
           </div>
-          <div className="text-lg font-bold">
-            ₹{(trip.price * trip.passengers.length).toLocaleString()}
+          <div className="flex flex-col items-end">
+            {/* Only show download button for non-canceled trips */}
+            {trip.status !== 'CANCELED' && (
+              <button
+                onClick={handlePrint}
+                className="bg-[#605DEC] hover:bg-[#4d4aa8] text-white font-bold py-2 px-4 rounded mb-2"
+              >
+                Download Invoice 
+              </button>
+            )}
+            <div className="text-lg font-bold">
+              ₹{(trip.price * trip.passengers.length).toLocaleString()}
+            </div>
           </div>
         </div>
 
@@ -179,6 +225,23 @@ const TripCard = ({ trip }) => {
           </div>
         </div>
       )}
+
+      {/* Place the ticket in DOM but hidden for html2canvas to work */}
+      <div 
+        ref={ticketRef} 
+        style={{ 
+          position: 'absolute', 
+          left: '-9999px',
+          // For development, we can make it visible to debug:
+          // position: 'static', 
+          // left: 'auto',
+          backgroundColor: 'white',
+          width: '600px',
+          zIndex: -1
+        }}
+      >
+        <Ticket trip={trip} />
+      </div>
     </div>
   );
 };

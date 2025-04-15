@@ -13,25 +13,17 @@ export async function POST(request) {
       );
     }
 
-    let query;
-    let checkQuery;
-    let fieldName;
-
-    if (type === "phone") {
-      fieldName = "phone_no";
-      checkQuery = `SELECT admin_id FROM admin WHERE phone_no = ? AND admin_id != ?`;
-      query = `UPDATE admin SET phone_no = ? WHERE admin_id = ?`;
-    } else if (type === "email") {
-      fieldName = "email";
-      checkQuery = `SELECT admin_id FROM admin WHERE email = ? AND admin_id != ?`;
-      query = `UPDATE admin SET email = ? WHERE admin_id = ?`;
-    } else {
+    if (type !== "phone" && type !== "email") {
       return NextResponse.json({ error: "Invalid contact type" }, { status: 400 });
     }
-
-    // Check if the contact is already in use
+    
+    const field = type === "phone" ? "phone_no" : "email";
+    
     connection = await db.getConnection();
-    const [checkRows] = await connection.execute(checkQuery, [newContact, adminId]);
+    const [checkRows] = await connection.execute(
+      `SELECT admin_id FROM admin WHERE ${field} = ? AND admin_id != ?`,
+      [newContact, adminId]
+    );
 
     if (checkRows.length > 0) {
       connection.release();
@@ -41,8 +33,10 @@ export async function POST(request) {
       );
     }
 
-    // Update the contact
-    await connection.execute(query, [newContact, adminId]);
+    await connection.execute(
+      `UPDATE admin SET ${field} = ? WHERE admin_id = ?`, 
+      [newContact, adminId]
+    );
 
     connection.release();
     return NextResponse.json({ success: true });

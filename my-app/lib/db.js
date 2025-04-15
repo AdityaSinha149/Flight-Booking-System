@@ -1,6 +1,5 @@
 import mysql from "mysql2/promise";
 
-// Create a connection pool
 const db = mysql.createPool({
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,

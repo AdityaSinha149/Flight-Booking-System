@@ -3,7 +3,6 @@ import db from "@/lib/db";
 
 export async function GET(request) {
     try {
-        // Update to use direct db queries instead of query utility
         const [unusedAirlines] = await db.execute(`
             SELECT a.airline_name 
             FROM airlines a

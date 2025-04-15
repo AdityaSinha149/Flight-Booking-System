@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { query } from "@/lib/db";
+import db from "@/lib/db";
 
 export async function POST(request) {
   try {
     const { routeId, flightNo, airlineName, departureTime, arrivalTime, price } = await request.json();
     
-    // Server-side validation: Check if departure time is before arrival time
     const departureDate = new Date(departureTime);
     const arrivalDate = new Date(arrivalTime);
     
@@ -16,7 +15,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const checkRows = await query(
+    const [checkRows] = await db.execute(
       "SELECT * FROM flight_instances WHERE flight_no = ? AND airline_name = ? AND departure_time = ?",
       [flightNo, airlineName, departureTime]
     );
@@ -28,7 +27,7 @@ export async function POST(request) {
       });
     }
 
-    await query(
+    await db.execute(
       "INSERT INTO flight_instances (route_id, flight_no, airline_name, departure_time, arrival_time, price) VALUES (?, ?, ?, ?, ?, ?)",
       [routeId, flightNo, airlineName, departureTime, arrivalTime, price]
     );

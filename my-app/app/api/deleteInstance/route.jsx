@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { query } from "@/lib/db";
+import db from "@/lib/db";
 
 export async function DELETE(request) {
   const instanceId = request.nextUrl?.searchParams?.get("instanceId");
   try {
-    await query(
+    await db.execute(
       "DELETE FROM flight_instances WHERE instance_id = ?", 
       [instanceId]
     );

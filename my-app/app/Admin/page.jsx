@@ -27,7 +27,6 @@ export default function AdminPage() {
   const [success, setSuccess] = useState("");
   const [departureAirport, setDepartureAirport] = useState("");
   const [arrivalAirport, setArrivalAirport] = useState("");
-  // Removed the unused routes state
 
   const { adminAirline, adminName } = useAdmin();
   const { signinVisible, signupVisible } = useAuth();
@@ -86,81 +85,6 @@ export default function AdminPage() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const handleCreateInstance = async () => {
-    if (!departureAirport || !arrivalAirport || !flightNo || !departureTime || !arrivalTime || !price) {
-      setError("All fields are required for creating an instance.");
-      return;
-    }
-
-    // Validate that departure time is before arrival time
-    const departureDate = new Date(departureTime);
-    const arrivalDate = new Date(arrivalTime);
-    
-    if (departureDate >= arrivalDate) {
-      setError("Departure time must be before arrival time.");
-      return;
-    }
-    
-    try {
-      setError("");
-      let routeId;
-
-      // First, check if the route already exists
-      const getRouteRes = await fetch(`/api/getRoutes?departureAirport=${departureAirport}&arrivalAirport=${arrivalAirport}`);
-      const getRouteData = await getRouteRes.json();
-
-      if (getRouteRes.ok && getRouteData.length > 0) {
-        routeId = getRouteData[0].route_id; // Use the existing route ID
-      } else {
-        // If the route does not exist, create it
-        const postRouteRes = await fetch("/api/getRoutes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ departureAirport, arrivalAirport }),
-        });
-        const postRouteData = await postRouteRes.json();
-
-        if (!postRouteRes.ok || !postRouteData.success) {
-          throw new Error(postRouteData.error || "Error creating route.");
-        }
-
-        routeId = postRouteData.routeId; // Use the newly created route ID
-      }
-
-      // Create flight instance with the route ID
-      const selectedFlight = filteredFlights.find((f) => f.flight_no == flightNo);
-      const airlineName = selectedFlight ? selectedFlight.airline_name : "";
-      const res = await fetch("/api/createInstance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          routeId,
-          flightNo,
-          airlineName,
-          departureTime,
-          arrivalTime,
-          price,
-        }),
-      });
-      const data = await res.json();
-
-      if (!data.success) {
-        throw new Error(data.message || "Error creating flight instance.");
-      }
-
-      setSuccess("Flight instance created successfully!");
-      setFlightNo("");
-      setDepartureTime("");
-      setArrivalTime("");
-      setPrice("");
-      setDepartureAirport("");
-      setArrivalAirport("");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (error) {
-      setError(error.message || "An error occurred.");
-    }
-  };
 
   const handleCreateFlight = async () => {
     if (!newFlightNo.trim()) {
@@ -241,11 +165,67 @@ export default function AdminPage() {
     setTimeout(() => setSuccess(""), 3000);
   };
 
+  // Restore and improve handleCreateInstance function
+  const handleCreateInstance = async () => {
+    if (!departureAirport || !arrivalAirport || !flightNo || !departureTime || !arrivalTime || !price) {
+      setError("All fields are required for creating an instance.");
+      return;
+    }
+
+    if (new Date(departureTime) >= new Date(arrivalTime)) {
+      setError("Departure time must be before arrival time.");
+      return;
+    }
+    
+    try {
+      setError("");
+      
+      // Create or get existing route through POST endpoint
+      const routeResponse = await fetch("/api/getRoutes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ departureAirport, arrivalAirport }),
+      });
+      
+      const routeData = await routeResponse.json();
+      
+      if (!routeData.success) {
+        throw new Error(routeData.error || "Failed to create or find route");
+      }
+      
+      const routeId = routeData.routeId;
+      
+      // Create flight instance
+      const flight = filteredFlights.find(f => f.flight_no == flightNo);
+      const res = await fetch("/api/createInstance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          routeId,
+          flightNo,
+          airlineName: flight?.airline_name || "",
+          departureTime,
+          arrivalTime,
+          price,
+        }),
+      });
+      
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || "Error creating flight instance.");
+      
+      setSuccess("Flight instance created successfully!");
+      // Reset form fields
+      setFlightNo(""); setDepartureTime(""); setArrivalTime("");
+      setPrice(""); setDepartureAirport(""); setArrivalAirport("");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (error) {
+      setError(error.message || "An error occurred.");
+    }
+  };
+
   return (
     <div className={dark ? "min-h-screen bg-gray-900 text-white" : "min-h-screen bg-white text-black"}>
       <Navbar isAdmin={true} adminName={adminName} />
-      
-      {/* Remove separate welcome message nav as it will be shown in Navbar */}
       
       <div className="p-8 sm:p-12 container mx-auto">
         <h1 className="text-3xl font-bold mb-6">{adminAirline} Admin</h1>
@@ -453,64 +433,7 @@ export default function AdminPage() {
           </div>
           <div className="flex justify-center">
             <button
-              onClick={async () => {
-                if (!departureAirport || !arrivalAirport || !flightNo || !departureTime || !arrivalTime || !price) {
-                  setError("All fields are required for creating an instance.");
-                  return;
-                }
-                
-                // Validate that departure time is before arrival time
-                const departureDate = new Date(departureTime);
-                const arrivalDate = new Date(arrivalTime);
-                
-                if (departureDate >= arrivalDate) {
-                  setError("Departure time must be before arrival time.");
-                  return;
-                }
-                
-                setError("");
-
-                // Get or create route
-                const routeRes = await fetch("/api/getRoutes", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ departureAirport, arrivalAirport }),
-                });
-                const routeData = await routeRes.json();
-                if (!routeData.success) {
-                  setError(routeData.error || "Error creating or fetching route.");
-                  return;
-                }
-
-                // Create flight instance with routeId
-                const selectedFlight = filteredFlights.find((f) => f.flight_no == flightNo);
-                const airlineName = selectedFlight ? selectedFlight.airline_name : "";
-                const res = await fetch("/api/createInstance", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    routeId: routeData.routeId,
-                    flightNo,
-                    airlineName,
-                    departureTime,
-                    arrivalTime,
-                    price,
-                  }),
-                });
-                const data = await res.json();
-                if (!data.success) {
-                  setError(data.message || "Error creating flight instance.");
-                  return;
-                }
-                setSuccess("Flight instance created successfully!");
-                setFlightNo("");
-                setDepartureTime("");
-                setArrivalTime("");
-                setPrice("");
-                setDepartureAirport("");
-                setArrivalAirport("");
-                setTimeout(() => setSuccess(""), 3000);
-              }}
+              onClick={handleCreateInstance}
               className="bg-[#605DEC] text-white px-4 py-2 rounded-md"
             >
               Create Flight Instance

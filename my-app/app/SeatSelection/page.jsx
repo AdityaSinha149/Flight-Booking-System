@@ -212,29 +212,6 @@ const SeatSelection = () => {
         return;
       }
       
-      // If booking is successful and we have ticket IDs, save payment details
-      if (bookingData.ticketIds && bookingData.ticketIds.length > 0) {
-        const paymentResponse = await fetch('/api/savePayment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ticket_ids: bookingData.ticketIds,
-            user_id: id,
-            amount_paid: selectedFlight.price * selectedSeats.length,
-            payment_method: 'UPI', // Default to UPI for Razorpay
-            transaction_id: paymentId
-          }),
-        });
-        
-        const paymentData = await paymentResponse.json();
-        if (!paymentData.success) {
-          console.error("Payment recording error:", paymentData.error);
-          // Continue to thank you page even if payment recording fails
-        }
-      }
-      
-      // Always redirect to thank you page after successful booking
-      console.log("Redirecting to thank you page...");
       router.push('/thankyou');
       
     } catch (error) {

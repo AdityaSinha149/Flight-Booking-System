@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import { useAuth } from '@/Contexts/AuthContext';
 import { useTheme } from '@/Contexts/ThemeContext';
 import { useAdmin } from '@/Contexts/AdminContext';
-import { useSuperAdmin } from '@/Contexts/SuperAdminContext'; // Add SuperAdminContext import
+import { useSuperAdmin } from '@/Contexts/SuperAdminContext';
 
 function Navbar({ isAdmin = false, adminName = "" }) {
   const { toggleSignupVisibility, toggleSigninVisibility, loggedIn, toggleLoggedIn, name } = useAuth();
   const { dark, toggleDarkMode } = useTheme();
   const { setAdminName, setAdminAirline } = useAdmin();
-  const { superAdminLoggedIn, setSuperAdminLoggedIn } = useSuperAdmin(); // Get SuperAdmin context
+  const { superAdminLoggedIn, setSuperAdminLoggedIn } = useSuperAdmin();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -33,7 +33,6 @@ function Navbar({ isAdmin = false, adminName = "" }) {
     }
   };
 
-  // Determine which type of user is logged in
   const displayName = isAdmin ? adminName : (superAdminLoggedIn ? "Super Admin" : name);
 
   return (

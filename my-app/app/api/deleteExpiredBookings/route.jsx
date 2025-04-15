@@ -3,7 +3,6 @@ import db from "@/lib/db";
 
 export async function DELETE(request) {
   try {
-    // Delete expired bookings
     const [result] = await db.execute(`
       DELETE FROM tickets
       WHERE instance_id IN (

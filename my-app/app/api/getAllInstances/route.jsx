@@ -3,7 +3,6 @@ import db from "@/lib/db";
 
 export async function GET(request) {
   try {
-    // Query to get all flight instances with route details
     const [instances] = await db.execute(`
       SELECT fi.*, f.airline_name, r.departure_airport_id, r.arrival_airport_id
       FROM flight_instances fi
