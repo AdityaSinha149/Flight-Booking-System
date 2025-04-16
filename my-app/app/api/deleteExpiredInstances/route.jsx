@@ -10,10 +10,11 @@ export async function DELETE(request) {
       DELETE FROM flight_instances WHERE departure_time < NOW() AND arrival_time < NOW()
     `);
 
-    connection.release();
     return NextResponse.json({ success: true, deletedCount: result.affectedRows });
   } catch (error) {
     if (connection) connection.release();
     return NextResponse.json({ error: error.message }, { status: 500 });
+  } finally {
+    if (connection) connection.release();
   }
 }

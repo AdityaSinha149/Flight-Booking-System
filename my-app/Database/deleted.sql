@@ -89,11 +89,13 @@ CREATE TRIGGER before_flight_delete
 BEFORE DELETE ON flights
 FOR EACH ROW
 BEGIN
-    INSERT INTO deleted_flights (
-        flight_no, airline_name, max_seat
-    ) VALUES (
-        OLD.flight_no, OLD.airline_name, OLD.max_seat
+    -- Delete from tickets (child table)
+    DELETE FROM tickets WHERE instance_id IN (
+        SELECT instance_id FROM flight_instances 
+        WHERE flight_no = OLD.flight_no AND airline_name = OLD.airline_name
     );
+    -- Delete from flight_instances (child table)
+    DELETE FROM flight_instances WHERE flight_no = OLD.flight_no AND airline_name = OLD.airline_name;
 END$$
 
 DELIMITER ;
@@ -106,20 +108,29 @@ CREATE TABLE deleted_airlines (
 
 DROP TRIGGER IF EXISTS before_airline_delete;
 
+
 DELIMITER $$
 
 CREATE TRIGGER before_airline_delete
 BEFORE DELETE ON airlines
 FOR EACH ROW
 BEGIN
-    INSERT INTO deleted_airlines (
-        airline_name
-    ) VALUES (
-        OLD.airline_name
+    -- Delete from tickets (child table)
+    DELETE FROM tickets WHERE instance_id IN (
+        SELECT instance_id FROM flight_instances 
+        WHERE airline_name = OLD.airline_name
     );
+
+    -- Delete from flight_instances (child table)
+    DELETE FROM flight_instances WHERE airline_name = OLD.airline_name;
+    
+    -- Delete from flights (child table)
+    DELETE FROM flights WHERE airline_name = OLD.airline_name;
+    
 END$$
 
 DELIMITER ;
+
 
 CREATE TABLE deleted_flight_routes (
     route_id             INT PRIMARY KEY,

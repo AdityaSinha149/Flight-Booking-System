@@ -128,7 +128,7 @@ const TripCard = ({ trip }) => {
           </div>
           <div className="flex flex-col items-end">
             {/* Only show download button for non-canceled trips */}
-            {trip.status !== 'CANCELED' && (
+            {trip.status !== 'CANCELED' && trip.status !== 'COMPLETED' && (
               <button
                 onClick={handlePrint}
                 className="bg-[#605DEC] hover:bg-[#4d4aa8] text-white font-bold py-2 px-4 rounded mb-2"

@@ -31,12 +31,13 @@ export async function POST(req) {
       seatNumbers
     ]);
     
-    connection.release();
     return NextResponse.json({ success: true, message: "Booking created." });
 
   } catch (error) {
     console.error("Database Error:", error);
     if (connection) connection.release();
     return NextResponse.json({ error: "Database error", details: error.message }, { status: 500 });
+  } finally {
+    if (connection) connection.release();
   }
 }

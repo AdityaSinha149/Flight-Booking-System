@@ -85,7 +85,7 @@ export async function POST(request) {
         dt.user_id,
         dt.booking_time AS booking_date,
         CASE
-          WHEN dfi.departure_time > NOW() THEN 'CANCELED'
+          WHEN dfi.arrival_time > NOW() THEN 'CANCELED'
           ELSE 'COMPLETED'
         END AS status,
         dt.deleted_at
@@ -153,7 +153,11 @@ export async function POST(request) {
       });
     });
 
-    return NextResponse.json(Object.values(trips));
+    const sortedTrips = Object.values(trips).sort((a, b) => {
+      return - new Date(a.departure_datetime) + new Date(b.departure_datetime);
+    });
+
+    return NextResponse.json(sortedTrips);
     
   } catch (error) {
     console.error("API route error:", error);

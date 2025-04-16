@@ -26,13 +26,13 @@ export async function DELETE(request) {
       );
     }
 
-    connection.release();
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (connection) connection.release();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }
     );
+  } finally {
+    if (connection) connection.release();
   }
 }

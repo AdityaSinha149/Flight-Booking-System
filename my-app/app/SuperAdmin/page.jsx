@@ -26,6 +26,7 @@ export default function SuperAdminPage() {
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [message, setMessage] = useState({ text: '', type: null });
 
   useEffect(() => {
     fetchAirlines();
@@ -101,12 +102,12 @@ export default function SuperAdminPage() {
     });
     const data = await response.json();
     if (data.success) {
-      alert("Admin added successfully!");
+      setMessageWithTimeout("Admin added successfully!", 'success');
       refreshAdmins(airline);
       setNewAdminForm((prev) => ({ ...prev, [airline]: { firstName: "", lastName: "", email: "", phone: "", password: "" } }));
       setShowAddAdmin((prev) => ({ ...prev, [airline]: false }));
     } else {
-      alert(data.error);
+      setMessageWithTimeout(data.error, 'error');
     }
   };
 
@@ -121,9 +122,14 @@ export default function SuperAdminPage() {
     setNewPassword("");
   };
 
+  const setMessageWithTimeout = (text, type) => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage({ text: '', type: null }), 3000); // Clear after 3 seconds
+  };
+
   const submitPasswordChange = async () => {
     if (!newPassword) {
-      alert("Please enter a new password");
+      setMessageWithTimeout("Please enter a new password", 'error');
       return;
     }
     
@@ -138,17 +144,17 @@ export default function SuperAdminPage() {
     
     const data = await response.json();
     if (data.success) {
-      alert("Password changed successfully!");
+      setMessageWithTimeout("Password changed successfully!", 'success');
       refreshAdmins(changingPassword.airline);
       setChangingPassword({ adminId: null, airline: null });
     } else {
-      alert(data.error || "Failed to change password");
+      setMessageWithTimeout(data.error || "Failed to change password", 'error');
     }
   };
 
   const handleAddAirline = async () => {
     if (!newAirlineName) {
-      alert("Please enter an airline name");
+      setMessageWithTimeout("Please enter an airline name", 'error');
       return;
     }
     
@@ -160,12 +166,12 @@ export default function SuperAdminPage() {
     
     const data = await response.json();
     if (data.success) {
-      alert("Airline added successfully!");
+      setMessageWithTimeout("Airline added successfully!", 'success');
       fetchAirlines();
       setNewAirlineName("");
       setAddingAirline(false);
     } else {
-      alert(data.error);
+      setMessageWithTimeout(data.error, 'error');
     }
   };
 
@@ -181,7 +187,7 @@ export default function SuperAdminPage() {
 
   const submitPhoneChange = async () => {
     if (!newPhone) {
-      alert("Please enter a new phone number");
+      setMessageWithTimeout("Please enter a new phone number", 'error');
       return;
     }
     
@@ -197,17 +203,17 @@ export default function SuperAdminPage() {
     
     const data = await response.json();
     if (data.success) {
-      alert("Phone number changed successfully!");
+      setMessageWithTimeout("Phone number changed successfully!", 'success');
       refreshAdmins(changingPhone.airline);
       setChangingPhone({ adminId: null, airline: null });
     } else {
-      alert(data.error || "Failed to change phone number");
+      setMessageWithTimeout(data.error || "Failed to change phone number", 'error');
     }
   };
 
   const submitEmailChange = async () => {
     if (!newEmail) {
-      alert("Please enter a new email address");
+      setMessageWithTimeout("Please enter a new email address", 'error');
       return;
     }
     
@@ -223,59 +229,55 @@ export default function SuperAdminPage() {
     
     const data = await response.json();
     if (data.success) {
-      alert("Email address changed successfully!");
+      setMessageWithTimeout("Email address changed successfully!", 'success');
       refreshAdmins(changingEmail.airline);
       setChangingEmail({ adminId: null, airline: null });
     } else {
-      alert(data.error || "Failed to change email address");
+      setMessageWithTimeout(data.error || "Failed to change email address", 'error');
     }
   };
 
   const handleDeleteAdmin = async (adminId, airline) => {
-    if (window.confirm("Are you sure you want to delete this admin? This action cannot be undone.")) {
-      try {
-        const response = await fetch("/api/deleteAdmin", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ adminId })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          alert("Admin deleted successfully!");
-          refreshAdmins(airline);
-        } else {
-          alert(data.error || "Failed to delete admin");
-        }
-      } catch (error) {
-        console.error("Delete admin error:", error);
-        alert("An error occurred while deleting the admin");
+    try {
+      const response = await fetch("/api/deleteAdmin", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminId })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setMessageWithTimeout("Admin deleted successfully!", 'success');
+        refreshAdmins(airline);
+      } else {
+        setMessageWithTimeout(data.error || "Failed to delete admin", 'error');
       }
+    } catch (error) {
+      console.error("Delete admin error:", error);
+      setMessageWithTimeout("An error occurred while deleting the admin", 'error');
     }
   };
 
   const handleDeleteAirline = async (airlineName) => {
-    if (window.confirm(`Are you sure you want to delete ${airlineName}? This action cannot be undone.`)) {
-      try {
-        const response = await fetch("/api/deleteAirline", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ airlineName })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          alert("Airline deleted successfully!");
-          fetchAirlines();
-        } else {
-          alert(data.error || "Failed to delete airline");
-        }
-      } catch (error) {
-        console.error("Delete airline error:", error);
-        alert("An error occurred while deleting the airline");
+    try {
+      const response = await fetch("/api/deleteAirline", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ airlineName })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setMessageWithTimeout("Airline deleted successfully!", 'success');
+        fetchAirlines();
+      } else {
+        setMessageWithTimeout(data.error || "Failed to delete airline", 'error');
       }
+    } catch (error) {
+      console.error("Delete airline error:", error);
+      setMessageWithTimeout("An error occurred while deleting the airline", 'error');
     }
   };
 
@@ -328,6 +330,11 @@ export default function SuperAdminPage() {
         </div>
       ) : (
         <div className="container mx-auto p-8">
+          {message.text && (
+            <div className={`mb-4 p-3 rounded-md ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {message.text}
+            </div>
+          )}
           <div className="flex justify-between items-center mb-6">
             <h1 className={`text-3xl font-bold ${dark ? 'text-blue-300' : 'text-blue-600'}`}>Super Admin Dashboard</h1>
             <button 

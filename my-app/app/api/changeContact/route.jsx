@@ -46,5 +46,7 @@ export async function POST(request) {
       { error: "Database error", details: error.message },
       { status: 500 }
     );
+  } finally {
+    if (connection) connection.release();
   }
 }

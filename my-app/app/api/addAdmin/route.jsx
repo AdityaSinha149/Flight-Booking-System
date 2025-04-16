@@ -23,13 +23,13 @@ export async function POST(request) {
     `;
     await connection.execute(query, [firstName, lastName, email, phone, hashedPassword, airline]);
 
-    connection.release();
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (connection) connection.release();
     return NextResponse.json(
       { error: error.message, details: error.message },
       { status: 500 }
     );
+  } finally {
+    if (connection) connection.release();
   }
 }
