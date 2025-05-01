@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [], 
+  content: ["./safelist.html"], 
   theme: {
     extend: {
       colors: {
