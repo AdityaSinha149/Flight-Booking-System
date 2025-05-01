@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
   try {
@@ -15,8 +15,8 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const [checkRows] = await db.execute(
-      "SELECT * FROM flight_instances WHERE flight_no = ? AND airline_name = ? AND departure_time = ?",
+    const { rows: checkRows } = await pool.query(
+      "SELECT 1 FROM flight_instances WHERE flight_no = $1 AND airline_name = $2 AND departure_time = $3",
       [flightNo, airlineName, departureTime]
     );
     
@@ -27,8 +27,8 @@ export async function POST(request) {
       });
     }
 
-    await db.execute(
-      "INSERT INTO flight_instances (route_id, flight_no, airline_name, departure_time, arrival_time, price) VALUES (?, ?, ?, ?, ?, ?)",
+    await pool.query(
+      "INSERT INTO flight_instances (route_id, flight_no, airline_name, departure_time, arrival_time, price) VALUES ($1, $2, $3, $4, $5, $6)",
       [routeId, flightNo, airlineName, departureTime, arrivalTime, price]
     );
     

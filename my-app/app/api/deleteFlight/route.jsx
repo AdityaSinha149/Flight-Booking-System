@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function DELETE(request) {
   const flightNo = request.nextUrl?.searchParams?.get("flightNo");
@@ -10,10 +10,12 @@ export async function DELETE(request) {
   }
   
   try {
-    const sql = "DELETE FROM flights WHERE flight_no = ? AND airline_name = ?";
-    const [result] = await db.execute(sql, [flightNo, airline]);
+    const { rowCount } = await pool.query(
+      "DELETE FROM flights WHERE flight_no = $1 AND airline_name = $2",
+      [flightNo, airline]
+    );
 
-    if (result.affectedRows === 0) {
+    if (rowCount === 0) {
       return NextResponse.json({ success: false, error: "Flight not found" }, { status: 404 });
     }
     

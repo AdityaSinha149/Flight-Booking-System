@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function DELETE(request) {
   let connection;
@@ -13,13 +13,13 @@ export async function DELETE(request) {
       );
     }
 
-    connection = await db.getConnection();
-    
     // Delete the airline without checking for admins or flights
-    const query = `DELETE FROM airlines WHERE airline_name = ?`;
-    const [result] = await connection.execute(query, [airlineName]);
+    const { rowCount } = await pool.query(
+      "DELETE FROM airlines WHERE airline_name = $1",
+      [airlineName]
+    );
 
-    if (result.affectedRows === 0) {
+    if (rowCount === 0) {
       return NextResponse.json(
         { error: "Airline not found" },
         { status: 404 }
@@ -32,7 +32,5 @@ export async function DELETE(request) {
       { error: "Database error", details: error.message },
       { status: 500 }
     );
-  } finally {
-    if (connection) connection.release();
   }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
     try {
@@ -12,11 +12,10 @@ export async function POST(request) {
             );
         }
         
-        // Replace query function with direct DB execute
-        const [rows] = await db.execute(`
+        const { rows } = await pool.query(`
             SELECT t.seat_number
             FROM tickets t
-            WHERE t.instance_id = ?;
+            WHERE t.instance_id = $1
         `, [instance_id]);
         
         const seatNumbers = rows.map(row => row.seat_number.toString());

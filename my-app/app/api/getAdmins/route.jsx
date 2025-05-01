@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function GET(request) {
   try {
@@ -13,7 +13,7 @@ export async function GET(request) {
       );
     }
 
-    const [rows] = await db.execute(`
+    const { rows } = await pool.query(`
       SELECT 
         admin_id, 
         CONCAT(first_name, ' ', last_name) AS admin_name, 
@@ -21,7 +21,7 @@ export async function GET(request) {
         pass, 
         phone_no
       FROM admin
-      WHERE airline_name = ?
+      WHERE airline_name = $1
     `, [airline]);
 
     return NextResponse.json(rows);

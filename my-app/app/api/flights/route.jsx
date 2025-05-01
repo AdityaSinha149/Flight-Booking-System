@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
     try {
@@ -60,7 +60,7 @@ export async function POST(request) {
         ORDER BY ${orderBy} ${direction}
       `;
       
-      const [rows] = await db.execute(sql, [
+      const { rows } = await pool.query(sql, [
         start_airport,
         end_airport,
         travel_date,

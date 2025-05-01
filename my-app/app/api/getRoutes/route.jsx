@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
-  let connection;
   try {
     const { departureAirport, arrivalAirport } = await request.json();
 
@@ -13,9 +12,8 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    connection = await db.getConnection();
-    const [routes] = await connection.execute(
-      "SELECT route_id FROM flight_routes WHERE departure_airport_id=? AND arrival_airport_id=?",
+    const { rows: routes } = await pool.query(
+      "SELECT route_id FROM flight_routes WHERE departure_airport_id=$1 AND arrival_airport_id=$2",
       [departureAirport, arrivalAirport]
     );
 
@@ -23,12 +21,12 @@ export async function POST(request) {
       return NextResponse.json({ success: true, routeId: routes[0].route_id });
     }
 
-    const [result] = await connection.execute(
-      "INSERT INTO flight_routes (departure_airport_id, arrival_airport_id) VALUES (?, ?)",
+    const { rows: insertResult } = await pool.query(
+      "INSERT INTO flight_routes (departure_airport_id, arrival_airport_id) VALUES ($1, $2) RETURNING route_id",
       [departureAirport, arrivalAirport]
     );
 
-    const newRouteId = result.insertId;
+    const newRouteId = insertResult[0].route_id;
     return NextResponse.json({ success: true, routeId: newRouteId });
   } catch (error) {
     console.error("getRoutes POST error:", error);
@@ -36,9 +34,5 @@ export async function POST(request) {
       success: false,
       error: error.message || "Failed to create route"
     }, { status: 500 });
-  } finally {
-    if (connection) {
-      connection.release();
-    }
   }
 }

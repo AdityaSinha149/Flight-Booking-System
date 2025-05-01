@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 import bcrypt from 'bcrypt';
 
 export async function POST(request) {
@@ -15,7 +15,10 @@ export async function POST(request) {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await db.execute(`UPDATE admin SET pass = ? WHERE admin_id = ?`, [hashedPassword, adminId]);
+    await pool.query(
+      "UPDATE admin SET pass = $1 WHERE admin_id = $2",
+      [hashedPassword, adminId]
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

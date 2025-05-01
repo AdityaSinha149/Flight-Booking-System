@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
   try {
@@ -13,8 +13,8 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const [checkRows] = await db.execute(
-      "SELECT * FROM flights WHERE flight_no = ? AND airline_name = ?",
+    const { rows: checkRows } = await pool.query(
+      "SELECT 1 FROM flights WHERE flight_no = $1 AND airline_name = $2",
       [flightNo, airlineName]
     );
 
@@ -22,8 +22,8 @@ export async function POST(request) {
       return NextResponse.json({ success: true, message: "Flight already exists" });
     }
 
-    await db.execute(
-      "INSERT INTO flights (flight_no, airline_name, max_seat) VALUES (?, ?, ?)",
+    await pool.query(
+      "INSERT INTO flights (flight_no, airline_name, max_seat) VALUES ($1, $2, $3)",
       [flightNo, airlineName, maxSeat]
     );
     return NextResponse.json({ success: true });

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function DELETE(request) {
   try {
@@ -14,19 +14,19 @@ export async function DELETE(request) {
     }
 
     // Delete unused flights
-    const [result] = await db.execute(`
+    const { rowCount } = await pool.query(`
       DELETE FROM flights
-      WHERE airline_name = ?
+      WHERE airline_name = $1
       AND flight_no NOT IN (
         SELECT DISTINCT flight_no
         FROM flight_instances
-        WHERE airline_name = ?
+        WHERE airline_name = $1
       )
-    `, [airline, airline]);
+    `, [airline]);
 
     return NextResponse.json({
       success: true,
-      deletedCount: result.affectedRows,
+      deletedCount: rowCount,
     });
   } catch (error) {
     return NextResponse.json(

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
   try {
@@ -99,9 +99,9 @@ export async function POST(request) {
         dt.booking_time DESC
     `;
 
-    // Execute both queries using direct db.execute
-    const [activeRows] = await db.execute(activeQuery, [user_id]);
-    const [canceledRows] = await db.execute(canceledQuery, [user_id]);
+    // Execute both queries using direct pool.query
+    const { rows: activeRows } = await pool.query(activeQuery, [user_id]);
+    const { rows: canceledRows } = await pool.query(canceledQuery, [user_id]);
     const allRows = [...activeRows, ...canceledRows];
     
     if (allRows.length === 0) {

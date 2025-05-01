@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
     try {
@@ -12,12 +12,11 @@ export async function POST(request) {
             );
         }
         
-        // Replace query function with direct DB execute
-        const [rows] = await db.execute(`
+        const { rows } = await pool.query(`
             SELECT f.max_seat
             FROM flight_instances fi
             JOIN flights f ON fi.flight_no = f.flight_no AND fi.airline_name = f.airline_name
-            WHERE fi.instance_id = ?
+            WHERE fi.instance_id = $1
         `, [instance_id]);
         
         let maxSeat = 0;

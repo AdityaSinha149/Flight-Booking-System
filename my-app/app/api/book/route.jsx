@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(req) {
-  let connection;
+  let client;
   try {
     const { instance_id, passengers, user_id, seats } = await req.json();
     
@@ -13,7 +13,7 @@ export async function POST(req) {
       );
     }
     
-    connection = await db.getConnection();
+    client = await pool.connect();
     
     const firstNames = passengers.map(p => p.firstName).join(",");
     const lastNames = passengers.map(p => p.lastName).join(",");
@@ -21,7 +21,7 @@ export async function POST(req) {
     const phones = passengers.map(p => p.phone).join(",");
     const seatNumbers = seats.join(",");
 
-    await connection.query("CALL InsertTickets(?,?,?,?,?,?,?)", [
+    await client.query("SELECT InsertTickets($1,$2,$3,$4,$5,$6,$7)", [
       firstNames,
       lastNames,
       emails,
@@ -35,9 +35,9 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("Database Error:", error);
-    if (connection) connection.release();
+    if (client) client.release();
     return NextResponse.json({ error: "Database error", details: error.message }, { status: 500 });
   } finally {
-    if (connection) connection.release();
+    if (client) client.release();
   }
 }

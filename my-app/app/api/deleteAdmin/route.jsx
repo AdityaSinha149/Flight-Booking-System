@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function DELETE(request) {
   try {
@@ -12,9 +12,12 @@ export async function DELETE(request) {
       );
     }
 
-    const [result] = await db.execute(`DELETE FROM admin WHERE admin_id = ?`, [adminId]);
+    const { rowCount } = await pool.query(
+      "DELETE FROM admin WHERE admin_id = $1",
+      [adminId]
+    );
 
-    if (result.affectedRows === 0) {
+    if (rowCount === 0) {
       return NextResponse.json(
         { error: "Admin not found" },
         { status: 404 }

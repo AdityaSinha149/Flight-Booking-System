@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function DELETE(request) {
   try {
@@ -12,12 +12,12 @@ export async function DELETE(request) {
       );
     }
 
-    const result = await query(
-      `DELETE FROM flight_routes WHERE route_id = ?`, 
+    const { rowCount } = await pool.query(
+      `DELETE FROM flight_routes WHERE route_id = $1`,
       [routeId]
     );
 
-    if (result.affectedRows === 0) {
+    if (rowCount === 0) {
       return NextResponse.json(
         { error: "Route not found or cannot be deleted" },
         { status: 404 }

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function GET(request) {
   try {
-    const [instances] = await db.execute(`
+    const { rows: instances } = await pool.query(`
       SELECT fi.*, f.airline_name, r.departure_airport_id, r.arrival_airport_id
       FROM flight_instances fi
       JOIN flights f ON fi.flight_no = f.flight_no AND fi.airline_name = f.airline_name

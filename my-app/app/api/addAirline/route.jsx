@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
   let connection;
@@ -13,14 +13,10 @@ export async function POST(request) {
       );
     }
 
-    connection = await db.getConnection();
-    const query = `INSERT INTO airlines (airline_name) VALUES (?)`;
-    await connection.execute(query, [airlineName]);
+    await pool.query("INSERT INTO airlines (airline_name) VALUES ($1)", [airlineName]);
 
-    connection.release();
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (connection) connection.release();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }

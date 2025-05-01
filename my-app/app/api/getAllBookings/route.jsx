@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function GET(request) {
   try {
@@ -36,7 +36,7 @@ export async function GET(request) {
 
     sql += " ORDER BY f.airline_name, t.seat_number";
 
-    const [bookings] = await db.execute(sql, params);
+    const { rows: bookings } = await pool.query(sql, params);
     return NextResponse.json(bookings);
   } catch (error) {
     return NextResponse.json(

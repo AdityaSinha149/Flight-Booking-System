@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function GET(request) {
   const airline = request.nextUrl?.searchParams?.get('airline');
@@ -9,8 +9,10 @@ export async function GET(request) {
   }
 
   try {
-    const sql = "SELECT flight_no, airline_name, max_seat FROM flights WHERE airline_name = ?";
-    const [rows] = await db.execute(sql, [airline]);
+    const { rows } = await pool.query(
+      "SELECT flight_no, airline_name, max_seat FROM flights WHERE airline_name = $1",
+      [airline]
+    );
     return NextResponse.json(rows);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

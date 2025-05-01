@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function DELETE(request) {
-  let connection;
   try {
-    connection = await db.getConnection();
-    
-    const [result] = await connection.execute(`
-      DELETE FROM flight_instances WHERE departure_time < NOW() AND arrival_time < NOW()
+    const { rowCount } = await pool.query(`
+      DELETE FROM flight_instances
+      WHERE departure_time < NOW() AND arrival_time < NOW()
     `);
 
-    return NextResponse.json({ success: true, deletedCount: result.affectedRows });
+    return NextResponse.json({ success: true, deletedCount: rowCount });
   } catch (error) {
-    if (connection) connection.release();
     return NextResponse.json({ error: error.message }, { status: 500 });
-  } finally {
-    if (connection) connection.release();
   }
 }

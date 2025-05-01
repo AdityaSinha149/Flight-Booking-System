@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from 'bcrypt';
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
-  let connection;
   try {
     const { firstName, lastName, email, phone, password, airline } = await request.json();
 
@@ -16,12 +15,10 @@ export async function POST(request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    connection = await db.getConnection();
-    const query = `
-      INSERT INTO admin (first_name, last_name, email, phone_no, pass, airline_name) 
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-    await connection.execute(query, [firstName, lastName, email, phone, hashedPassword, airline]);
+    await pool.query(
+      "INSERT INTO admin (first_name, last_name, email, phone_no, pass, airline_name) VALUES ($1, $2, $3, $4, $5, $6)",
+      [firstName, lastName, email, phone, hashedPassword, airline]
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -29,7 +26,5 @@ export async function POST(request) {
       { error: error.message, details: error.message },
       { status: 500 }
     );
-  } finally {
-    if (connection) connection.release();
   }
 }

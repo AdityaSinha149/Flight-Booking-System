@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export async function POST(request) {
-  let connection;
   try {
     const { adminId, newContact, type } = await request.json();
 
@@ -19,34 +18,28 @@ export async function POST(request) {
     
     const field = type === "phone" ? "phone_no" : "email";
     
-    connection = await db.getConnection();
-    const [checkRows] = await connection.execute(
-      `SELECT admin_id FROM admin WHERE ${field} = ? AND admin_id != ?`,
+    const { rows: checkRows } = await pool.query(
+      `SELECT admin_id FROM admin WHERE ${field} = $1 AND admin_id != $2`,
       [newContact, adminId]
     );
 
     if (checkRows.length > 0) {
-      connection.release();
       return NextResponse.json(
         { error: `This ${type} is already in use by another admin` },
         { status: 400 }
       );
     }
 
-    await connection.execute(
-      `UPDATE admin SET ${field} = ? WHERE admin_id = ?`, 
+    await pool.query(
+      `UPDATE admin SET ${field} = $1 WHERE admin_id = $2`,
       [newContact, adminId]
     );
 
-    connection.release();
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (connection) connection.release();
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }
     );
-  } finally {
-    if (connection) connection.release();
   }
 }
