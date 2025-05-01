@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useTheme } from "@/Contexts/ThemeContext";
+import { useAuth } from "@/Contexts/AuthContext";
 import Ticket from './Ticket';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';

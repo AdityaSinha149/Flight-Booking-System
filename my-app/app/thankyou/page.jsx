@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/Contexts/ThemeContext";
 import TickAnimation from "@/components/TickAnimation";
 
 export default function ThankyouPage() {

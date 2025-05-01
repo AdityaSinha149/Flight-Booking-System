@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
+import { useAuth } from "@/Contexts/AuthContext"; // Import useAuth
 
 const Ticket = ({ trip }) => {
   const { name } = useAuth(); // Get user details from AuthContext
