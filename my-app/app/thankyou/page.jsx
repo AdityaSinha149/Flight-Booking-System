@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/Contexts/ThemeContext";
-import TickAnimation from "@/components/TickAnimation";
+import TickAnimation from "@/Components/TickAnimation";
 
 export default function ThankyouPage() {
     const router = useRouter();
