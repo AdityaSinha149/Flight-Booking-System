@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useAdmin } from "@/contexts/AdminContext";
-import Navbar from "@/components/Navbar";
-import SigninCard from "@/components/SigninCard";
-import SignupCard from "@/components/SignupCard";
-import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from '@/contexts/ThemeContext';
+import { useAdmin } from "@/Contexts/AdminContext";
+import Navbar from "@/Components/Navbar";
+import SigninCard from "@/Components/SigninCard";
+import SignupCard from "@/Components/SignupCard";
+import { useAuth } from "@/Contexts/AuthContext";
+import { useTheme } from "@/Contexts/ThemeContext";
 import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
