@@ -208,8 +208,11 @@ export default function SearchBar() {
           />
           {showFromDropdown && (
             <ul
-              className={`absolute top-full left-0 w-full shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50 ${dark ? "bg-black text-white" : "bg-white text-gray-600"
-                }`}
+              className={
+                dark 
+                  ? "absolute top-full left-0 w-full shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50 bg-black text-white" 
+                  : "absolute top-full left-0 w-full shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50 bg-white text-gray-600"
+              }
             >
               {filteredFrom.length > 0 ? (
                 filteredFrom.map((loc, i) => (
@@ -261,8 +264,11 @@ export default function SearchBar() {
           />
           {showToDropdown && (
             <ul
-              className={`absolute top-full left-0 w-full shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50 ${dark ? "bg-black text-white" : "bg-white text-gray-600"
-                }`}
+              className={
+                dark 
+                  ? "absolute top-full left-0 w-full shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50 bg-black text-white" 
+                  : "absolute top-full left-0 w-full shadow-md border border-gray-700 mt-1 max-h-40 overflow-auto rounded-md z-50 bg-white text-gray-600"
+              }
             >
               {filteredTo.length > 0 ? (
                 filteredTo.map((loc, i) => (
