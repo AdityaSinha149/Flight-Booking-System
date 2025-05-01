@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useTheme } from '@/Contexts/ThemeContext';
-import { useSuperAdmin } from '@/Contexts/SuperAdminContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useSuperAdmin } from '@/contexts/SuperAdminContext';
 import { useRouter } from "next/navigation";
-import Navbar from "@/Components/Navbar";
+import Navbar from "@/components/Navbar";
 
 export default function UnusedResourcesPage() {
   const { dark } = useTheme();

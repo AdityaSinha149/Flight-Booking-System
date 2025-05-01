@@ -1,7 +1,7 @@
 import React from "react";
-import { useTheme } from "@/Contexts/ThemeContext";
-import { useFlights } from "@/Contexts/FlightContext";
-import { usePassenger } from "@/Contexts/PassengerContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useFlights } from "@/contexts/FlightContext";
+import { usePassenger } from "@/contexts/PassengerContext";
 
 import { useRouter } from "next/navigation";
 

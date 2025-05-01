@@ -1,13 +1,13 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { FlightProvider } from '@/Contexts/FlightContext'
-import { ThemeProvider } from '@/Contexts/ThemeContext'
-import { PassengerProvider } from '@/Contexts/PassengerContext'
-import { AuthProvider } from '@/Contexts/AuthContext'
-import { SearchProvider } from '@/Contexts/SearchContext'
-import { SeatProvider } from '@/Contexts/SeatContext'
-import { AdminProvider } from "@/Contexts/AdminContext";
-import { SuperAdminProvider } from '@/Contexts/SuperAdminContext';
+import { FlightProvider } from '@/contexts/FlightContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { PassengerProvider } from '@/contexts/PassengerContext'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { SearchProvider } from '@/contexts/SearchContext'
+import { SeatProvider } from '@/contexts/SeatContext'
+import { AdminProvider } from "@/contexts/AdminContext";
+import { SuperAdminProvider } from '@/contexts/SuperAdminContext';
 
 const inter = Inter({ subsets: ['latin'] })
 
