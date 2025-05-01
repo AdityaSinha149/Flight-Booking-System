@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
 import TickAnimation from "@/components/TickAnimation";
