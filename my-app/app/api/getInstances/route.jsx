@@ -21,7 +21,7 @@ export async function GET(request) {
       JOIN flight_routes fr ON fi.route_id = fr.route_id
       LEFT JOIN tickets t ON fi.instance_id = t.instance_id
       WHERE f.airline_name = $1
-      GROUP BY fi.instance_id
+      GROUP BY fi.instance_id, fi.flight_no, fi.departure_time, fi.arrival_time, fi.price, fr.departure_airport_id, fr.arrival_airport_id, f.max_seat
       ORDER BY fi.departure_time
     `, [airline]);
     

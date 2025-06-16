@@ -10,7 +10,7 @@ export async function GET(request) {
       SELECT 
         t.ticket_id,
         t.seat_number,
-        CONCAT(t.first_name, ' ', t.last_name) AS passenger_name,
+        t.first_name || ' ' || t.last_name AS passenger_name,
         t.email AS passenger_email,
         t.phone_no AS passenger_phone,
         t.booking_time,
@@ -30,15 +30,18 @@ export async function GET(request) {
 
     let params = [];
     if (airline) {
-      sql += " WHERE f.airline_name = ?";
+      sql += " WHERE f.airline_name = $1";
       params.push(airline);
     }
 
     sql += " ORDER BY f.airline_name, t.seat_number";
 
+    console.log("SQL Query:", sql);
+    console.log("Params:", params);
     const { rows: bookings } = await pool.query(sql, params);
     return NextResponse.json(bookings);
   } catch (error) {
+    console.error("Database error:", error);
     return NextResponse.json(
       { error: "Database error", details: error.message },
       { status: 500 }
