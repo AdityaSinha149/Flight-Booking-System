@@ -34,3 +34,30 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+Local environment
+-----------------
+
+This project reads environment variables at runtime from `process.env`. For local development create a `my-app/.env.local` file (already added with example values) and keep secrets out of version control. There's also `my-app/.env.example` with placeholders you can copy.
+
+Make sure `.env.local` is listed in your global or repository `.gitignore` so you don't accidentally commit secrets.
+
+Using Supabase (optional)
+------------------------
+
+You can run this project using Supabase-managed Postgres. Steps:
+
+1. Create a Supabase project at https://app.supabase.com.
+2. In the Supabase dashboard go to `SQL` → `New query` and paste the SQL from `my-app/Database/create_tables_supabase.sql`. Run it to create tables.
+3. Copy your `SUPABASE_URL` and `anon` key from Project Settings → API and paste them into `my-app/.env.local` (or copy `.env.supabase.example` to a safe `.env` file and edit).
+4. If you want the app server to connect to Postgres directly, copy the `Connection string` (DATABASE_URL) from Supabase Project Settings → Database and set `DATABASE_URL` in `my-app/.env.local`.
+5. Start the dev server:
+
+```bash
+cd my-app
+npm install
+npm run dev
+```
+
+6. Use Supabase SQL editor to re-run or modify schema, and Supabase dashboard to inspect rows.
+

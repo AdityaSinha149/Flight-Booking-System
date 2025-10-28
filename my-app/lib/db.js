@@ -10,7 +10,7 @@ export const pool = new Pool({
 });
 
 // Change URI as needed
-const fallbackConnectionString = process.env.DATABASE_URL || "postgresql://postgres:bruh@localhost:5432/DEI_Report";
+const fallbackConnectionString = process.env.DATABASE_URL;
 
 const con = new Client({
   connectionString: fallbackConnectionString,
