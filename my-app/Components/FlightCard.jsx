@@ -36,6 +36,7 @@ const FlightCard = ({ flight, isSelected }) => {
           src={`/flights/${flight.airline.split(" ")[0]}.png`}
           alt="Airline Logo"
           className="w-14 h-14 rounded-full object-cover"
+          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/flights/flight-icon.png'; }}
         />
         <div>
           <p className="text-xl font-bold text-[#605DEC]">{flight.airline}</p>
@@ -69,17 +70,17 @@ const FlightCard = ({ flight, isSelected }) => {
             <div className="flex items-center ">
               {/* Dashed Line */}
               <img
-                src="./flights/line.png"
+                src="/flights/line.png"
                 alt="Flight Path"
                 className="w-8 h-[2px]"
               />
               <img
-                src="./flights/line.png"
+                src="/flights/line.png"
                 alt="Flight Path"
                 className="w-8 h-[2px]"
               />
               <img
-                src="./flights/line.png"
+                src="/flights/line.png"
                 alt="Flight Path"
                 className="w-8 h-[2px]"
               />
@@ -90,7 +91,7 @@ const FlightCard = ({ flight, isSelected }) => {
             </p>
           </div>
           <img
-            src="./flights/flight-icon.png"
+            src="/flights/flight-icon.png"
             alt="Flight icon"
             className="w-8 h-auto"
           />
