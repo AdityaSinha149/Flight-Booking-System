@@ -14,24 +14,25 @@ export async function POST(req) {
     }
     
     client = await pool.connect();
-    
-    const firstNames = passengers.map(p => p.firstName).join(",");
-    const lastNames = passengers.map(p => p.lastName).join(",");
-    const emails = passengers.map(p => p.email).join(",");
-    const phones = passengers.map(p => p.phone).join(",");
-    const seatNumbers = seats.join(",");
 
-    await client.query("SELECT InsertTickets($1,$2,$3,$4,$5,$6,$7)", [
-      firstNames,
-      lastNames,
-      emails,
-      phones,
-      user_id,
-      instance_id,
-      seatNumbers
-    ]);
-    
-    return NextResponse.json({ success: true, message: "Booking created." });
+    // Start transaction
+    await client.query('BEGIN');
+
+    // Insert a ticket row per passenger/seat
+    for (let i = 0; i < passengers.length; i++) {
+      const p = passengers[i];
+      const seat = seats[i] || seats[0];
+      // Insert into tickets. Schema expected: first_name, last_name, email, phone_no, seat_number, user_id, instance_id, booking_time
+      await client.query(
+        `INSERT INTO tickets (first_name, last_name, email, phone_no, seat_number, user_id, instance_id, booking_time)
+         VALUES ($1,$2,$3,$4,$5,$6,$7, NOW())`,
+        [p.firstName || null, p.lastName || null, p.email || null, p.phone || null, seat, user_id, instance_id]
+      );
+    }
+
+    await client.query('COMMIT');
+
+    return NextResponse.json({ success: true, message: 'Booking created.' });
 
   } catch (error) {
     console.error("Database Error:", error);
