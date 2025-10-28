@@ -37,7 +37,7 @@ export async function POST(request) {
           fi.airline_name AS airline,
           fr.departure_airport_id AS departure_airport,
           fr.arrival_airport_id AS arrival_airport,
-          (fi.arrival_time - fi.departure_time) AS duration,
+          (fi.arrival_time - fi.departure_time)::text AS duration,
           fi.departure_time AS departure_datetime,
           to_char(fi.departure_time, 'HH12:MI AM') AS departure,
           fi.arrival_time AS arrival_datetime,
