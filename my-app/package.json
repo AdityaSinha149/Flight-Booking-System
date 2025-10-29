@@ -27,6 +27,7 @@
     "mysql2": "^3.12.0",
     "next": "^16.0.0",
     "next-auth": "^4.24.11",
+    "nodemailer": "^7.0.10",
     "pg": "^8.15.6",
     "pg-sdk-node": "https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-sdk-node/releases/v2/phonepe-pg-sdk-node.tgz",
     "postgres": "^3.4.7",
@@ -34,7 +35,8 @@
     "railway": "^2.0.17",
     "razorpay": "^2.9.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "twilio": "^5.10.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
