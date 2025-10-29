@@ -10,11 +10,63 @@ export default function ThankyouPage() {
     const secondsRef = useRef(10);
     const { dark } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const [bookingProcessed, setBookingProcessed] = useState(false);
 
     // Wait for component to mount to avoid hydration mismatch
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Process booking from PhonePe callback
+    useEffect(() => {
+        if (!mounted || bookingProcessed) return;
+
+        const processBooking = async () => {
+            try {
+                const pendingBookingData = sessionStorage.getItem('pendingBooking');
+                if (!pendingBookingData) {
+                    console.log("No pending booking found");
+                    setBookingProcessed(true);
+                    return;
+                }
+
+                const bookingData = JSON.parse(pendingBookingData);
+                console.log("Processing booking after payment:", bookingData);
+
+                // Call booking API
+                const bookingResponse = await fetch('/api/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instance_id: bookingData.instance_id,
+                        airline: bookingData.airline,
+                        flight_no: bookingData.flight_no,
+                        passengers: bookingData.passengers,
+                        user_id: bookingData.user_id,
+                        seats: bookingData.seats,
+                        payment_id: bookingData.merchantTransactionId,
+                    }),
+                });
+
+                const result = await bookingResponse.json();
+
+                if (result.success) {
+                    console.log("Booking completed successfully");
+                    // Clear the pending booking data
+                    sessionStorage.removeItem('pendingBooking');
+                } else {
+                    console.error("Booking failed:", result.error);
+                }
+
+                setBookingProcessed(true);
+            } catch (error) {
+                console.error("Error processing booking:", error);
+                setBookingProcessed(true);
+            }
+        };
+
+        processBooking();
+    }, [mounted, bookingProcessed]);
 
     useEffect(() => {
         const intervalId = setInterval(() => {

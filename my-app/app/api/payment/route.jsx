@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import Razorpay from "razorpay";
+import crypto from "crypto";
+import { StandardCheckoutClient, Env, StandardCheckoutPayRequest } from "pg-sdk-node";
 
 export async function POST(req) {
     try {
@@ -29,41 +30,61 @@ export async function POST(req) {
                 { status: 400 }
             );
         }
-
-        // Check Razorpay credentials
-        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-            console.error("Payment API: Missing Razorpay credentials");
+        // Check PhonePe credentials
+        if (!process.env.PHONEPE_CLIENT_ID || !process.env.PHONEPE_CLIENT_SECRET || !process.env.PHONEPE_CLIENT_VERSION) {
+            console.error("Payment API: Missing PhonePe credentials");
             return NextResponse.json(
-                { error: "Payment gateway configuration error" },
+                { error: "Payment gateway configuration error. Set PHONEPE_MOCK_MODE=true for local testing." },
                 { status: 500 }
             );
         }
 
-        // Proceed with Razorpay integration
-        const razorpay = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET,
-        });
+        // Initialize PhonePe StandardCheckoutClient
+        const env = process.env.PHONEPE_ENV === "PRODUCTION" ? Env.PRODUCTION : Env.SANDBOX;
         
-        // Create order with proper error handling
         try {
-            // Make sure we have an integer amount (Razorpay requirement)
-            const finalAmount = Math.round(numericAmount);
-            console.log(`Payment API: Creating order with amount: ${finalAmount}`);
+            const client = StandardCheckoutClient.getInstance(
+                process.env.PHONEPE_CLIENT_ID,
+                process.env.PHONEPE_CLIENT_SECRET,
+                parseInt(process.env.PHONEPE_CLIENT_VERSION),
+                env
+            );
             
-            const order = await razorpay.orders.create({
-                amount: finalAmount,
-                currency: "INR",
-                receipt: "receipt_" + Date.now(),
+            // Create payment order with proper error handling
+            // Make sure we have an integer amount (PhonePe requirement - amount in paise)
+            const finalAmount = Math.round(numericAmount);
+            const merchantOrderId = `ORDER_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+            
+            console.log(`Payment API: Creating PhonePe payment with amount: ${finalAmount}`);
+            
+            // Build payment request using PhonePe SDK
+            const payRequest = StandardCheckoutPayRequest.builder()
+                .merchantOrderId(merchantOrderId)
+                .amount(finalAmount)
+                .redirectUrl(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/thankyou`)
+                .build();
+
+            // Initiate payment using PhonePe SDK
+            const response = await client.pay(payRequest);
+            
+            console.log("Payment API: PhonePe payment initiated successfully", { 
+                merchantOrderId,
+                redirectUrl: response.redirectUrl
             });
             
-            console.log("Payment API: Order created successfully", { orderId: order.id });
-            return NextResponse.json(order);
+            // Return payment details to client
+            return NextResponse.json({
+                success: true,
+                merchantOrderId: merchantOrderId,
+                redirectUrl: response.redirectUrl,
+                amount: finalAmount,
+                currency: "INR"
+            });
             
-        } catch (razorpayError) {
-            console.error("Payment API: Razorpay order creation failed", razorpayError);
+        } catch (phonePeError) {
+            console.error("Payment API: PhonePe payment creation failed", phonePeError);
             return NextResponse.json(
-                { error: "Failed to create payment order: " + razorpayError.message },
+                { error: "Failed to create payment order: " + (phonePeError.message || "Unknown error") },
                 { status: 500 }
             );
         }

@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/migrate.js && next dev",
+    "migrate": "node scripts/migrate.js",
+    "init-schema": "node scripts/init-schema.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -23,9 +25,10 @@
     "jspdf": "^3.0.1",
     "mysql": "^2.18.1",
     "mysql2": "^3.12.0",
-    "next": "^15.1.7",
+    "next": "^16.0.0",
     "next-auth": "^4.24.11",
     "pg": "^8.15.6",
+    "pg-sdk-node": "https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-sdk-node/releases/v2/phonepe-pg-sdk-node.tgz",
     "postgres": "^3.4.7",
     "psql": "^0.0.1",
     "railway": "^2.0.17",

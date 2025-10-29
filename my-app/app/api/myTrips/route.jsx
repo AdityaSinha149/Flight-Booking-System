@@ -24,93 +24,81 @@ export async function POST(request) {
       );
     }
     
-    // First query: Get active bookings
-    const activeQuery = `
+    // First query: Get active bookings with flight details (PostgreSQL syntax)
+    const activeResult = await pool.query(`
       SELECT 
         t.ticket_id,
         t.instance_id,
-        fi.flight_no,
-        fi.airline_name AS airline,
-        fr.departure_airport_id AS departure_airport,
-        fr.arrival_airport_id AS arrival_airport,
-        TIME_FORMAT(TIMEDIFF(fi.arrival_time, fi.departure_time), '%H:%i:%s') AS duration,
-        fi.departure_time AS departure_datetime,
-        DATE_FORMAT(fi.departure_time, '%Y-%m-%d %h:%i %p') AS departure,
-        fi.arrival_time AS arrival_datetime,
-        DATE_FORMAT(fi.arrival_time, '%Y-%m-%d %h:%i %p') AS arrival,
         t.seat_number,
-        CONCAT(t.first_name, ' ', t.last_name) AS passenger_name,
+        t.first_name || ' ' || t.last_name AS passenger_name,
         t.email AS passenger_email,
         t.phone_no AS passenger_phone,
-        t.ticket_id,
-        fi.price,
         t.user_id,
         t.booking_time AS booking_date,
+        fi.flight_no,
+        fi.airline_name AS airline,
+        fi.departure_time AS departure_datetime,
+        fi.arrival_time AS arrival_datetime,
+        fi.price,
+        fr.departure_airport_id AS departure_airport,
+        fr.arrival_airport_id AS arrival_airport,
+        TO_CHAR(fi.arrival_time - fi.departure_time, 'HH24:MI') AS duration,
         'ACTIVE' AS status
       FROM 
         tickets t
         LEFT JOIN flight_instances fi ON t.instance_id = fi.instance_id
         LEFT JOIN flight_routes fr ON fi.route_id = fr.route_id
       WHERE 
-        t.user_id = ?
+        t.user_id = $1
       ORDER BY 
         t.booking_time DESC
-    `;
+    `, [user_id]);
 
-    // Second query: Get canceled/deleted bookings with improved routes handling using WITH clause
-    const canceledQuery = `
-      WITH all_routes AS (
-        SELECT route_id, departure_airport_id, arrival_airport_id FROM flight_routes
-        UNION ALL
-        SELECT route_id, departure_airport_id, arrival_airport_id FROM deleted_flight_routes
-      )
-      SELECT 
-        dt.ticket_id,
-        dt.instance_id,
-        dfi.flight_no,
-        dfi.airline_name AS airline,
-        r.departure_airport_id AS departure_airport,
-        r.arrival_airport_id AS arrival_airport,
-        TIME_FORMAT(TIMEDIFF(dfi.arrival_time, dfi.departure_time), '%H:%i:%s') AS duration,
-        dfi.departure_time AS departure_datetime,
-        DATE_FORMAT(dfi.departure_time, '%Y-%m-%d %h:%i %p') AS departure,
-        dfi.arrival_time AS arrival_datetime,
-        DATE_FORMAT(dfi.arrival_time, '%Y-%m-%d %h:%i %p') AS arrival,
-        dt.seat_number,
-        dt.name AS passenger_name,
-        dt.email AS passenger_email,
-        dt.phone_no AS passenger_phone,
-        dt.ticket_id,
-        dfi.price,
-        dt.user_id,
-        dt.booking_time AS booking_date,
-        CASE
-          WHEN dfi.arrival_time > NOW() THEN 'CANCELED'
-          ELSE 'COMPLETED'
-        END AS status,
-        dt.deleted_at
-      FROM 
-        deleted_tickets dt
-        JOIN deleted_flight_instances dfi ON dt.instance_id = dfi.instance_id
-        LEFT JOIN all_routes r ON dfi.route_id = r.route_id
-      WHERE 
-        dt.user_id = ?
-      ORDER BY 
-        dt.booking_time DESC
-    `;
+    // Second query: Get canceled/deleted bookings (if deleted_tickets table exists)
+    let canceledResult = { rows: [] };
+    try {
+      canceledResult = await pool.query(`
+        SELECT 
+          dt.ticket_id,
+          dt.instance_id,
+          dt.seat_number,
+          dt.first_name || ' ' || dt.last_name AS passenger_name,
+          dt.email AS passenger_email,
+          dt.phone_no AS passenger_phone,
+          dt.user_id,
+          dt.booking_time AS booking_date,
+          dfi.flight_no,
+          dfi.airline_name AS airline,
+          dfi.departure_time AS departure_datetime,
+          dfi.arrival_time AS arrival_datetime,
+          dfi.price,
+          dfr.departure_airport_id AS departure_airport,
+          dfr.arrival_airport_id AS arrival_airport,
+          TO_CHAR(dfi.arrival_time - dfi.departure_time, 'HH24:MI') AS duration,
+          'CANCELED' AS status,
+          dt.deleted_at
+        FROM 
+          deleted_tickets dt
+          LEFT JOIN deleted_flight_instances dfi ON dt.instance_id = dfi.instance_id
+          LEFT JOIN deleted_flight_routes dfr ON dfi.route_id = dfr.route_id
+        WHERE 
+          dt.user_id = $1
+        ORDER BY 
+          dt.booking_time DESC
+      `, [user_id]);
+    } catch (err) {
+      console.log('deleted_tickets table may not exist, skipping:', err.message);
+    }
 
-    // Execute both queries using direct pool.query
-    const { rows: activeRows } = await pool.query(activeQuery, [user_id]);
-    const { rows: canceledRows } = await pool.query(canceledQuery, [user_id]);
-    const allRows = [...activeRows, ...canceledRows];
+    const allRows = [...activeResult.rows, ...canceledResult.rows];
     
     if (allRows.length === 0) {
       return NextResponse.json([]);
     }
     
+    // Group tickets by instance_id and booking date
     const trips = {};
     allRows.forEach(row => {
-      // Create a composite key using both instance_id and booking date (YYYY-MM-DD)
       const bookingDate = new Date(row.booking_date).toISOString().split('T')[0];
       const tripKey = `${row.instance_id}_${bookingDate}_${row.status}`;
       
@@ -123,9 +111,7 @@ export async function POST(request) {
           arrival_airport: row.arrival_airport,
           duration: row.duration,
           departure_datetime: row.departure_datetime,
-          departure: row.departure,
           arrival_datetime: row.arrival_datetime,
-          arrival: row.arrival,
           booking_date: row.booking_date,
           price: row.price,
           status: row.status,
@@ -146,7 +132,6 @@ export async function POST(request) {
     // Sort passengers by seat number for each trip
     Object.values(trips).forEach(trip => {
       trip.passengers.sort((a, b) => {
-        // Convert seat numbers to integers for proper numerical sorting
         const seatA = parseInt(a.seat_number) || 0;
         const seatB = parseInt(b.seat_number) || 0;
         return seatA - seatB;
@@ -154,7 +139,7 @@ export async function POST(request) {
     });
 
     const sortedTrips = Object.values(trips).sort((a, b) => {
-      return - new Date(a.departure_datetime) + new Date(b.departure_datetime);
+      return new Date(b.booking_date) - new Date(a.booking_date);
     });
 
     return NextResponse.json(sortedTrips);

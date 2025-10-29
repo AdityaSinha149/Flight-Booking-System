@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "@fontsource/niconne";
-@import "@fontsource/italianno";
-@import "@fontsource/corinthia";
-@import "@fontsource/merriweather";
-@import "@fontsource/newsreader";
-
 :root {
   --background: #eae7e7;
   --foreground: #171717;

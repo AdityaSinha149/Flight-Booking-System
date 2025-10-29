@@ -12,7 +12,6 @@ import { useSeat } from "@/Contexts/SeatContext";
 import { useAuth } from "@/Contexts/AuthContext";
 
 import { useRouter } from "next/navigation";
-import Script from "next/script";
 
 
 const SeatSelection = () => {
@@ -46,7 +45,7 @@ const SeatSelection = () => {
     setSelectedSeats(prev => [...prev, seatId]); // Add the seat
   };
 
-  // Modify handlePayment to improve error handling
+  // Modify handlePayment for PhonePe integration
   const handlePayment = async () => {
     try {
       // First, validate inputs before initiating payment
@@ -86,8 +85,8 @@ const SeatSelection = () => {
       // Calculate the total amount for all passengers (in rupees)
       const totalPrice = price * selectedSeats.length;
       
-      // Convert to paise (multiply by 100) for Razorpay
-      // Razorpay expects amount in paise (1 rupee = 100 paise)
+      // Convert to paise (multiply by 100) for PhonePe
+      // PhonePe expects amount in paise (1 rupee = 100 paise)
       const totalAmountInPaise = Math.round(totalPrice * 100);
 
       console.log("Payment details:", { 
@@ -97,7 +96,7 @@ const SeatSelection = () => {
         totalAmountInPaise: totalAmountInPaise
       });
       
-      // Create Razorpay order with explicit amount validation
+      // Create PhonePe payment order with explicit amount validation
       if (totalAmountInPaise <= 0) {
         setErrorMessage("Invalid payment amount calculated. Please try again.");
         return;
@@ -127,60 +126,28 @@ const SeatSelection = () => {
         throw new Error(errorMessage);
       }
 
-      if (!data.id) {
-        console.error("Payment API: Missing order ID in response", data);
+      if (!data.redirectUrl) {
+        console.error("Payment API: Missing redirectUrl in response", data);
         throw new Error("Invalid payment response");
       }
 
-      // Initialize payment
-      const paymentData = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: data.amount,
-        currency: data.currency,
-        order_id: data.id,
-        name: "Flight Booking",
-        description: `${selectedFlight.airline} - ${selectedFlight.flight_no}`,
-        handler: async function (response) {
-          try {
-            console.log("Payment successful:", response);
-            const paymentId = response.razorpay_payment_id;
-            
-            if (!paymentId) {
-              setErrorMessage("Payment failed - no payment ID received");
-              return;
-            }
-            
-            // Only book flight tickets after successful payment
-            await bookFlightTickets(paymentId);
-          } catch (error) {
-            console.error("Payment handler error:", error);
-            setErrorMessage("Error processing payment completion. Please contact support.");
-          }
-        },
-        // Add modal closing handler to detect payment cancellations or failures
-        modal: {
-          ondismiss: function() {
-            console.log("Payment modal dismissed");
-            setErrorMessage("Payment was cancelled or failed. No booking has been made.");
-          }
-        },
-        prefill: {
-          name: passengers[0]?.firstName + ' ' + passengers[0]?.lastName,
-          email: passengers[0]?.email,
-          contact: passengers[0]?.phone
-        },
-        theme: {
-          color: "#605DEC",
-        }
-      };
+      // Store booking details in sessionStorage for later use after payment callback
+      sessionStorage.setItem('pendingBooking', JSON.stringify({
+        instance_id: selectedFlight.instance_id,
+        airline: selectedFlight.airline,
+        flight_no: selectedFlight.flight_no,
+        passengers: passengers,
+        user_id: id,
+        seats: selectedSeats,
+        merchantTransactionId: data.merchantTransactionId,
+        amount: totalAmountInPaise
+      }));
 
-      console.log("Initializing Razorpay with config:", {
-        ...paymentData,
-        key: paymentData.key ? "present" : "missing"
-      });
-
-      const payment = new window.Razorpay(paymentData);   
-      payment.open();
+      console.log("Redirecting to PhonePe checkout:", data.redirectUrl);
+      
+      // Redirect to PhonePe payment page
+      window.location.href = data.redirectUrl;
+      
     } catch (error) {
       console.error("Payment initialization error:", error);
       setErrorMessage(error.message || "Payment initialization failed. Please try again.");
@@ -233,7 +200,6 @@ const SeatSelection = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <Script type="text/javascript" src="https://checkout.razorpay.com/v1/checkout.js"></Script>
       <Navbar />
       <div className={`flex flex-1 ${dark ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
         {/* Left Section - Seat Map Panel */}
